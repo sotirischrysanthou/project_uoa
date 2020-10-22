@@ -6,8 +6,8 @@
 #define LIST_EOF (ListNode)0
 
 
-typedef struct list_node* ListNode;
 typedef class list* List;
+typedef struct list_node* ListNode;
 
 struct list_node
 {
