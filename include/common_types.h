@@ -2,7 +2,7 @@
 
 
 #include <string>
-#include "List.h"
+
 
 using namespace std;
 
@@ -20,5 +20,6 @@ typedef int (*CompareFunc)(Pointer a, Pointer b);
 
 // Pointer to function that distroy an element value
 typedef void (*DestroyFunc)(Pointer value);
+
 
 
