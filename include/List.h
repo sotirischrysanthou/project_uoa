@@ -42,9 +42,8 @@ public:
     
     
     // Returns the first node that it's content is equal with value
-    // orNULL if doesn't exist
+    // or NULL if doesn't exist
     Pointer list_find(Pointer value, CompareFunc compare);
-
 
 
     // Traversing the list /////////////////////////////////////////////

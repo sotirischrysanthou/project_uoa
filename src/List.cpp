@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "List.h"
-
+#include"item.h"
 
 
 
@@ -92,7 +92,6 @@ Pointer list::list_find(Pointer value, CompareFunc compare)
 	ListNode node = this->list_find_node(value, compare);
 	return node == NULL ? NULL : node->value;
 }
-
 
 
 // Traversing the list /////////////////////////////////////////////
