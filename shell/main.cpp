@@ -94,14 +94,14 @@ int main(int argc, char const *argv[])
     print_list(d.get_common_list());
 
     printf("\n\n");
-    List visited_list=new list(NULL);
-    print_commons(visited_list,a.get_common_list(),stdout);
+    List visited_lists=new list(NULL);
+    print_commons(visited_lists,a.get_common_list(),stdout);
     printf("\n\n");
-    print_commons(visited_list,b.get_common_list(),stdout);
+    print_commons(visited_lists,b.get_common_list(),stdout);
     printf("\n\n");
-    print_commons(visited_list,c.get_common_list(),stdout);
+    print_commons(visited_lists,c.get_common_list(),stdout);
     printf("\n\n");
-    print_commons(visited_list,d.get_common_list(),stdout);
+    print_commons(visited_lists,d.get_common_list(),stdout);
 
 
     return 0;
