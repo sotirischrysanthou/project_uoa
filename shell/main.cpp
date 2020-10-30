@@ -67,10 +67,10 @@ void print_commons(List visited_lists, List list_to_visit,FILE *output_file)
 int main(int argc, char const *argv[])
 {
 
-    item a("a");
-    item b("b");
-    item c("c");
-    item d("d");
+    item a("a",10);
+    item b("b",20);
+    item c("c",30);
+    item d("d",40);
     foo(a.get_common_list(), b.get_common_list());
     foo(c.get_common_list(), d.get_common_list());
     printf("\n\na\n");
