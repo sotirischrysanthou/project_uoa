@@ -1,5 +1,11 @@
 #include "List.h"
 using namespace std;
+
+int itemHashFunc(Pointer item,int TABLE_SIZE)
+{
+
+}
+
 class item
 {
     string id;

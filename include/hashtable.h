@@ -2,54 +2,24 @@
 #define HASHTABLE
 
 #include "avl_tree.h"
-#include "list.h"
+
 
 using namespace std;
 
-struct bucket_item
-{
-    string key;
-    avl_tree tree;
-};
+#include "List.h"
 
-struct bucket
-{
-    int count;
-    bucket_item *items;
-    bucket(int num)
-    {
-        count = 0;
-        items = new bucket_item[num];
-    }
-    ~bucket()
-    {
-        delete[] items;
-    }
-};
+#define  HT_SIZE 100
 
 class hashtable
 {
-    List *ht;
-    int size;
-    int b_max;
-    
-    public:
-    int hash(string str);
-    avl_tree* find_tree(string str);
-    void insert(list_node* rec_l_node, string str, int i);
-    int search(int i, string disease="", string from="", string to="", string country="");
-    string gettopk(int k, string disease, string country, string from, string to);
-    string getAdmDis(string disease, string from, string to, string country="");
-    hashtable(int num, int b_num)
-    {
-        size=num;
-        b_max=b_num/(sizeof(string)+sizeof(avl_tree));
-        ht=new List[size];
-    }
-    ~hashtable()
-    {
-        delete[] ht;
-    }
+    List table[HT_SIZE];
+    DestroyFunc destroy_value; // function that distroys an element value
+    CompareFunc compare;
+    hashFunc hashfunction; 
+public:
+    hashtable(DestroyFunc destroy_value,hashFunc hashfunction,CompareFunc compare);
+    Pointer search(Pointer value);
+    void insert(Pointer value);
 };
 
 #endif

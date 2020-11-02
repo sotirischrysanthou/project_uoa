@@ -39,6 +39,11 @@ int list_cmp(Pointer l1, Pointer l2)
         return 1;
 }
 
+int site_cmp(Pointer p1,Pointer p2)
+{
+    
+}
+
 void print_commons(List visited_lists, List list_to_visit,FILE *output_file)
 {
     if (visited_lists->list_find(list_to_visit, list_cmp))
