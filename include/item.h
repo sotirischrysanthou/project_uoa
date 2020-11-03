@@ -8,10 +8,12 @@ int itemHashFunc(Pointer item,int TABLE_SIZE)
 
 class item
 {
-    string id;
+    string folder;
+    int id;
     List common_list;
+    List specs;
 public:
-    item(string item_id);
+    item(string fldr, int i);
     List get_common_list();
     string get_item_id();
     void change_common_list(List new_list);
