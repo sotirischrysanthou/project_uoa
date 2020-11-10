@@ -19,7 +19,7 @@ all:    $(LIB_STATIC) $(SHELL_PROGRAM)
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -lm
 
 $(LIB_STATIC):		$(LIB_OBJECTS) $(LIB_HEADERS)
-	mkdir lib
+	mkdir -p lib
 	$(AR) $(ARFLAGS) $@ $(LIB_OBJECTS)
 
 $(SHELL_PROGRAM):	$(SHELL_OBJECTS) $(LIB_STATIC)
@@ -27,6 +27,5 @@ $(SHELL_PROGRAM):	$(SHELL_OBJECTS) $(LIB_STATIC)
 
 clean:
 	rm -f $(LIB_OBJECTS) $(LIB_STATIC) $(SHELL_OBJECTS) $(SHELL_PROGRAM)
-	rm -r ./lib
 
 .PHONY: all clean
