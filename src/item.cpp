@@ -15,7 +15,17 @@ List item::get_common_list()
     return common_list;
 }
 
-string item::get_item_id()
+int item::get_item_id()
+{
+    return id;
+}
+
+string item::get_item_folder()
+{
+    return folder;
+}
+
+string item::get_item_full_id()
 {
     return folder+"//"+to_string(id);
 }

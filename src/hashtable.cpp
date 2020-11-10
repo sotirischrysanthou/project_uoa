@@ -16,18 +16,26 @@ hashtable::hashtable(DestroyFunc destroy_value,hashFunc hashfunction,CompareFunc
 
     for (int i = 0; i < HT_SIZE; i++)
     {
-        table[i]=new list(NULL);
+        table[i]=new list(destroy_value);
     }
 }
 
-Pointer hashtable::search(Pointer value)
+hashtable::~hashtable()
 {
-    List chain=table[hashfunction(value)];
-    return chain->list_find(value,compare);
+    for (int i = 0; i < HT_SIZE; i++)
+    {
+        delete table[i];
+    }
 }
 
-void hashtable::insert(Pointer value)
+Pointer hashtable::search(Pointer key)
+{
+    List chain=table[hashfunction(key)];
+    return chain->list_find(key,compare);
+}
+
+void hashtable::insert(hashtable_node* value)
 {   
-    List chain=table[hashfunction(value)];
-    chain->list_insert_next(chain->list_last(),value);
+    List chain=table[hashfunction(value->key)];
+    chain->list_insert_next(chain->list_last(),(Pointer)value);
 }

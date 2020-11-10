@@ -1,5 +1,6 @@
 #include <iostream>
 #include "item.h"
+#include "hashtable.h"
 
 void foo(List main_l, List to_del_l)
 {
@@ -25,7 +26,7 @@ void print_list(List list_to_print)
     {
         // printf("%p\n",tempNode);
         tempItem = (item *)list_to_print->list_node_value(tempNode);
-        printf("%s->", tempItem->get_item_id().c_str());
+        printf("%s->", tempItem->get_item_full_id().c_str());
         tempNode = tempNode->next;
     } while (tempNode != NULL);
     printf("NULL\n");
@@ -57,7 +58,7 @@ void print_commons(List visited_lists, List list_to_visit,FILE *output_file)
     {
         nodeTwo=list_to_visit->list_next(nodeTwo);
         itemTwo=(item*)list_to_visit->list_node_value(nodeTwo);
-        fprintf(output_file,"%s,%s\n",itemOne->get_item_id().c_str(),itemTwo->get_item_id().c_str());
+        fprintf(output_file,"%s,%s\n",itemOne->get_item_full_id().c_str(),itemTwo->get_item_full_id().c_str());
         if(nodeTwo==list_to_visit->list_last())
         {
             nodeOne=list_to_visit->list_next(nodeOne);
@@ -110,6 +111,6 @@ int main(int argc, char const *argv[])
     printf("\n\n");
     print_commons(visited_lists,d.get_common_list(),stdout);
 
-
+    
     return 0;
 }

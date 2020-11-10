@@ -10,6 +10,15 @@ using namespace std;
 
 #define  HT_SIZE 100
 
+
+struct hashtable_node
+{
+    Pointer key;
+    Pointer value;
+};
+
+typedef int (*hashFunc)(Pointer value);
+
 class hashtable
 {
     List table[HT_SIZE];
@@ -18,8 +27,9 @@ class hashtable
     hashFunc hashfunction; 
 public:
     hashtable(DestroyFunc destroy_value,hashFunc hashfunction,CompareFunc compare);
+    ~hashtable();
     Pointer search(Pointer value);
-    void insert(Pointer value);
+    void insert(hashtable_node* value);
 };
 
 #endif

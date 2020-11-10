@@ -11,7 +11,7 @@ LIB_STATIC=	lib/libproject.a
 
 SHELL_SOURCE=	$(wildcard ./shell/*.cpp)
 SHELL_OBJECTS=	$(SHELL_SOURCE:.cpp=.o)
-SHELL_PROGRAM=	exe
+SHELL_PROGRAM=	./exe
 
 all:    $(LIB_STATIC) $(SHELL_PROGRAM)
 
