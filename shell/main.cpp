@@ -58,17 +58,10 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     item *itemTwo = itemOne;
     while (nodeOne != list_to_visit->list_last())
     {
-<<<<<<< HEAD
-        nodeTwo = list_to_visit->list_next(nodeTwo);
-        itemTwo = (item *)list_to_visit->list_node_value(nodeTwo);
-        fprintf(output_file, "%s,%s\n", itemOne->get_item_id().c_str(), itemTwo->get_item_id().c_str());
-        if (nodeTwo == list_to_visit->list_last())
-=======
         nodeTwo=list_to_visit->list_next(nodeTwo);
         itemTwo=(item*)list_to_visit->list_node_value(nodeTwo);
         fprintf(output_file,"%s,%s\n",itemOne->get_item_full_id().c_str(),itemTwo->get_item_full_id().c_str());
         if(nodeTwo==list_to_visit->list_last())
->>>>>>> 97477d82ac400390dcb9b26254e2166be5195bca
         {
             nodeOne = list_to_visit->list_next(nodeOne);
             itemOne = (item *)list_to_visit->list_node_value(nodeOne);
@@ -77,70 +70,6 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
         }
     }
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
-}
-
-void parse_json(string folder) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
-{
-    DIR *dir;
-    dirent *dir_item;
-    FILE *stream;
-    char *buffer = NULL;
-    size_t buffer_size = 0;
-
-    string name;
-    int id;
-
-    dir = opendir(folder.c_str());
-    dir_item = readdir(dir);
-    item* it;
-    spec* sp;
-    char *s;
-    List spec_list;
-
-    while (dir_item != NULL) // for every file in dir
-    {
-        if (dir_item->d_type == DT_DIR) // skip . and ..
-        {
-            dir_item = readdir(dir);
-            continue;
-        }
-        name = dir_item->d_name;
-        stream = fopen(name.c_str(), "r");
-
-        // while(getline(&buffer,&buffer_size,stream)!=-1)
-        // {
-        //     sscanf("\"%s\": \"%s\"")
-        // }
-        
-        it = new item(folder, atoi(name.c_str()));
-
-        long length;
-        fseek (stream, 0, SEEK_END);
-        length = ftell(stream);
-        fseek(stream, 0, SEEK_SET);
-        buffer = (char*)malloc(length);
-        if(buffer)
-        {
-          fread(buffer, 1, length, stream);
-        }
-        fclose (stream);
-
-        s = strtok(buffer, "{},:\n");
-        spec_list = new list(NULL);
-
-        while(s!=NULL)
-        {
-            sp=new spec;
-            sp->s_name = s;
-            s = strtok(NULL, "{},:\n");
-            sp->s_info = s;
-            s = strtok(NULL, "{},:\n");
-        }
-
-        //insert speps into item
-        //insert item into our database
-        free(buffer);
-    }
 }
 
 int main(int argc, char const *argv[])
@@ -180,13 +109,7 @@ int main(int argc, char const *argv[])
     printf("\n\n");
     print_commons(visited_lists, c.get_common_list(), stdout);
     printf("\n\n");
-<<<<<<< HEAD
     print_commons(visited_lists, d.get_common_list(), stdout);
 
-=======
-    print_commons(visited_lists,d.get_common_list(),stdout);
-
-    
->>>>>>> 97477d82ac400390dcb9b26254e2166be5195bca
     return 0;
 }
