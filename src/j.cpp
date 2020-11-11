@@ -25,7 +25,7 @@ json_table_node *get_number()
         /*
         ! ERROR 
         */
-        printf("error1\n");
+        printf("error1\n"); 
     }
 
     end_of_number = ch;
