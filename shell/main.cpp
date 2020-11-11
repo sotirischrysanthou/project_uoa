@@ -112,7 +112,7 @@ void parse_json(string folder) // folder is inner folder (ex. ebay.com) ./data/2
         //     sscanf("\"%s\": \"%s\"")
         // }
         
-        it = new item(folder, atoi(name.c_str()));
+        it = new item(folder, atoi(name.c_str())); 
 
         long length;
         fseek (stream, 0, SEEK_END);
