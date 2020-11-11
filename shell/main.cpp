@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "item.h"
+#include "hashtable.h"
 
 void foo(List main_l, List to_del_l)
 {
@@ -28,7 +29,7 @@ void print_list(List list_to_print)
     {
         // printf("%p\n",tempNode);
         tempItem = (item *)list_to_print->list_node_value(tempNode);
-        printf("%s->", tempItem->get_item_id().c_str());
+        printf("%s->", tempItem->get_item_full_id().c_str());
         tempNode = tempNode->next;
     } while (tempNode != NULL);
     printf("NULL\n");
@@ -57,10 +58,17 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     item *itemTwo = itemOne;
     while (nodeOne != list_to_visit->list_last())
     {
+<<<<<<< HEAD
         nodeTwo = list_to_visit->list_next(nodeTwo);
         itemTwo = (item *)list_to_visit->list_node_value(nodeTwo);
         fprintf(output_file, "%s,%s\n", itemOne->get_item_id().c_str(), itemTwo->get_item_id().c_str());
         if (nodeTwo == list_to_visit->list_last())
+=======
+        nodeTwo=list_to_visit->list_next(nodeTwo);
+        itemTwo=(item*)list_to_visit->list_node_value(nodeTwo);
+        fprintf(output_file,"%s,%s\n",itemOne->get_item_full_id().c_str(),itemTwo->get_item_full_id().c_str());
+        if(nodeTwo==list_to_visit->list_last())
+>>>>>>> 97477d82ac400390dcb9b26254e2166be5195bca
         {
             nodeOne = list_to_visit->list_next(nodeOne);
             itemOne = (item *)list_to_visit->list_node_value(nodeOne);
@@ -172,7 +180,13 @@ int main(int argc, char const *argv[])
     printf("\n\n");
     print_commons(visited_lists, c.get_common_list(), stdout);
     printf("\n\n");
+<<<<<<< HEAD
     print_commons(visited_lists, d.get_common_list(), stdout);
 
+=======
+    print_commons(visited_lists,d.get_common_list(),stdout);
+
+    
+>>>>>>> 97477d82ac400390dcb9b26254e2166be5195bca
     return 0;
 }

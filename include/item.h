@@ -22,6 +22,8 @@ class item
 public:
     item(string fldr, int i);
     List get_common_list();
-    string get_item_id();
+    int get_item_id();
+    string get_item_folder();
+    string get_item_full_id();
     void change_common_list(List new_list);
 };
