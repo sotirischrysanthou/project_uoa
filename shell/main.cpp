@@ -1,4 +1,7 @@
 #include <iostream>
+#include <dirent.h>
+#include <string.h>
+#include <stdio.h>
 #include "item.h"
 
 void foo(List main_l, List to_del_l)
@@ -39,45 +42,106 @@ int list_cmp(Pointer l1, Pointer l2)
         return 1;
 }
 
-int site_cmp(Pointer p1,Pointer p2)
+int site_cmp(Pointer p1, Pointer p2)
 {
-    
 }
 
-void print_commons(List visited_lists, List list_to_visit,FILE *output_file)
+void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
 {
     if (visited_lists->list_find(list_to_visit, list_cmp))
         return;
-    
-    ListNode nodeOne=list_to_visit->list_first();
-    item *   itemOne=(item*)list_to_visit->list_node_value(nodeOne);
-    ListNode nodeTwo=nodeOne;
-    item *   itemTwo=itemOne;
-    while(nodeOne!=list_to_visit->list_last())
+
+    ListNode nodeOne = list_to_visit->list_first();
+    item *itemOne = (item *)list_to_visit->list_node_value(nodeOne);
+    ListNode nodeTwo = nodeOne;
+    item *itemTwo = itemOne;
+    while (nodeOne != list_to_visit->list_last())
     {
-        nodeTwo=list_to_visit->list_next(nodeTwo);
-        itemTwo=(item*)list_to_visit->list_node_value(nodeTwo);
-        fprintf(output_file,"%s,%s\n",itemOne->get_item_id().c_str(),itemTwo->get_item_id().c_str());
-        if(nodeTwo==list_to_visit->list_last())
+        nodeTwo = list_to_visit->list_next(nodeTwo);
+        itemTwo = (item *)list_to_visit->list_node_value(nodeTwo);
+        fprintf(output_file, "%s,%s\n", itemOne->get_item_id().c_str(), itemTwo->get_item_id().c_str());
+        if (nodeTwo == list_to_visit->list_last())
         {
-            nodeOne=list_to_visit->list_next(nodeOne);
-            itemOne=(item*)list_to_visit->list_node_value(nodeOne);
-            nodeTwo=nodeOne;
-            itemTwo=itemOne;
+            nodeOne = list_to_visit->list_next(nodeOne);
+            itemOne = (item *)list_to_visit->list_node_value(nodeOne);
+            nodeTwo = nodeOne;
+            itemTwo = itemOne;
         }
     }
-    visited_lists->list_insert_next(visited_lists->list_last(),list_to_visit);
+    visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
+void parse_json(string folder) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+{
+    DIR *dir;
+    dirent *dir_item;
+    FILE *stream;
+    char *buffer = NULL;
+    size_t buffer_size = 0;
 
+    string name;
+    int id;
+
+    dir = opendir(folder.c_str());
+    dir_item = readdir(dir);
+    item* it;
+    spec* sp;
+    char *s;
+    List spec_list;
+
+    while (dir_item != NULL) // for every file in dir
+    {
+        if (dir_item->d_type == DT_DIR) // skip . and ..
+        {
+            dir_item = readdir(dir);
+            continue;
+        }
+        name = dir_item->d_name;
+        stream = fopen(name.c_str(), "r");
+
+        // while(getline(&buffer,&buffer_size,stream)!=-1)
+        // {
+        //     sscanf("\"%s\": \"%s\"")
+        // }
+        
+        it = new item(folder, atoi(name.c_str()));
+
+        long length;
+        fseek (stream, 0, SEEK_END);
+        length = ftell(stream);
+        fseek(stream, 0, SEEK_SET);
+        buffer = (char*)malloc(length);
+        if(buffer)
+        {
+          fread(buffer, 1, length, stream);
+        }
+        fclose (stream);
+
+        s = strtok(buffer, "{},:\n");
+        spec_list = new list(NULL);
+
+        while(s!=NULL)
+        {
+            sp=new spec;
+            sp->s_name = s;
+            s = strtok(NULL, "{},:\n");
+            sp->s_info = s;
+            s = strtok(NULL, "{},:\n");
+        }
+
+        //insert speps into item
+        //insert item into our database
+        free(buffer);
+    }
+}
 
 int main(int argc, char const *argv[])
 {
 
-    item a("a",10);
-    item b("b",20);
-    item c("c",30);
-    item d("d",40);
+    item a("a", 10);
+    item b("b", 20);
+    item c("c", 30);
+    item d("d", 40);
     foo(a.get_common_list(), b.get_common_list());
     foo(c.get_common_list(), d.get_common_list());
     printf("\n\na\n");
@@ -101,15 +165,14 @@ int main(int argc, char const *argv[])
     print_list(d.get_common_list());
 
     printf("\n\n");
-    List visited_lists=new list(NULL);
-    print_commons(visited_lists,a.get_common_list(),stdout);
+    List visited_lists = new list(NULL);
+    print_commons(visited_lists, a.get_common_list(), stdout);
     printf("\n\n");
-    print_commons(visited_lists,b.get_common_list(),stdout);
+    print_commons(visited_lists, b.get_common_list(), stdout);
     printf("\n\n");
-    print_commons(visited_lists,c.get_common_list(),stdout);
+    print_commons(visited_lists, c.get_common_list(), stdout);
     printf("\n\n");
-    print_commons(visited_lists,d.get_common_list(),stdout);
-
+    print_commons(visited_lists, d.get_common_list(), stdout);
 
     return 0;
 }
