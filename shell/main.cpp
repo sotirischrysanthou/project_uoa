@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "item.h"
 #include "hashtable.h"
+#include "parser.h"
 
 void foo(List main_l, List to_del_l)
 {
