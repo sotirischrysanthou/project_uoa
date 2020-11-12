@@ -6,12 +6,12 @@ using namespace std;
 
 // }
 
-struct spec
-{
-    string s_name;
-    char info_type;
-    string s_info;
-};
+// struct spec
+// {
+//     string s_name;
+//     char info_type;
+//     string s_info;
+// };
 
 class item
 {
@@ -26,4 +26,5 @@ public:
     string get_item_folder();
     string get_item_full_id();
     void change_common_list(List new_list);
+    void set_specs(List s_list);
 };

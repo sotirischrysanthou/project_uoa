@@ -274,10 +274,10 @@ List create_jTable()
     return tList;
 }
 
-List parse(char *filename)
+List parse(string filename)
 {
     l = new list(NULL);
-    FILE *stream = fopen(filename, "r");
+    FILE *stream = fopen(filename.c_str(), "r");
     char *buffer = NULL;
     long length;
     fseek(stream, 0, SEEK_END);

@@ -26,4 +26,4 @@ j_pair *json_pair();
 List create_jList_of_pairs();
 json_table_node *json_table();
 List create_jTable();
-List parse(char *filename);
+List parse(string filename);

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "item.h"
 #include "parser.h"
+#include "compare_funcs.h"
 #include "../include/hashtable.h"
 #include "compare_funcs.h"
 
@@ -70,32 +71,33 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
-int read_files(string folder,HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+void read_files(string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
-    FILE *stream;
-    char *buffer = NULL;
-    size_t buffer_size = 0;
 
     string name;
     int id;
 
+    avl_tree* tree = new avl_tree();
+    HashTable_Node ht_n = new hashtable_node();
+    ht_n->key = new string(folder);
+    ht_n->value = tree;
+
     dir = opendir(folder.c_str());
     dir_item = readdir(dir);
+<<<<<<< HEAD
     item *it;
     spec *sp;
     char *s;
-    List spec_list;
-
     while (dir_item != NULL) // for every file in dir
-    {
         if (dir_item->d_type == DT_DIR) // skip . and ..
         {
             dir_item = readdir(dir);
             continue;
         }
         name = dir_item->d_name;
+<<<<<<< HEAD
         stream = fopen(name.c_str(), "r");
 
         // while(getline(&buffer,&buffer_size,stream)!=-1)
@@ -115,23 +117,23 @@ int read_files(string folder,HashTable htable) // folder is inner folder (ex. eb
             fread(buffer, 1, length, stream);
         }
         fclose(stream);
+=======
 
-        s = strtok(buffer, "{},:\n");
-        spec_list = new list(NULL);
+        spec_list = parse(name);
+        if (spec_list==NULL)
+            continue;
+>>>>>>> 2caa594780b81aaf3a7c34bb480aeba882e90915
 
-        while (s != NULL)
-        {
-            sp = new spec;
-            sp->s_name = s;
-            s = strtok(NULL, "{},:\n");
-            sp->s_info = s;
-            s = strtok(NULL, "{},:\n");
-        }
-
+        it = new item(folder, atoi(name.c_str()));
         //insert speps into item
+        it->set_specs(spec_list);
+
+        //insert item into tree
+        tree->insert(it, cmp_avl_insert);
+
         //insert item into our database
-        free(buffer);
     }
+    htable->insert(ht_n);
 }
 
 int hashfunction(Pointer key)
