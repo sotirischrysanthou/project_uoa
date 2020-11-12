@@ -5,6 +5,7 @@
 #include "item.h"
 #include "parser.h"
 #include "../include/hashtable.h"
+#include "compare_funcs.h"
 
 void foo(List main_l, List to_del_l)
 {
@@ -44,8 +45,6 @@ int list_cmp(Pointer l1, Pointer l2)
         return 1;
 }
 
-
-
 void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
 {
     if (visited_lists->list_find(list_to_visit, list_cmp))
@@ -57,10 +56,10 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     item *itemTwo = itemOne;
     while (nodeOne != list_to_visit->list_last())
     {
-        nodeTwo=list_to_visit->list_next(nodeTwo);
-        itemTwo=(item*)list_to_visit->list_node_value(nodeTwo);
-        fprintf(output_file,"%s,%s\n",itemOne->get_item_full_id().c_str(),itemTwo->get_item_full_id().c_str());
-        if(nodeTwo==list_to_visit->list_last())
+        nodeTwo = list_to_visit->list_next(nodeTwo);
+        itemTwo = (item *)list_to_visit->list_node_value(nodeTwo);
+        fprintf(output_file, "%s,%s\n", itemOne->get_item_full_id().c_str(), itemTwo->get_item_full_id().c_str());
+        if (nodeTwo == list_to_visit->list_last())
         {
             nodeOne = list_to_visit->list_next(nodeOne);
             itemOne = (item *)list_to_visit->list_node_value(nodeOne);
@@ -71,12 +70,7 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
-HT read_all_folders()
-{
-
-}
-
-void read_files(string folder) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+int read_files(string folder,HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
@@ -89,8 +83,8 @@ void read_files(string folder) // folder is inner folder (ex. ebay.com) ./data/2
 
     dir = opendir(folder.c_str());
     dir_item = readdir(dir);
-    item* it;
-    spec* sp;
+    item *it;
+    spec *sp;
     char *s;
     List spec_list;
 
@@ -108,26 +102,26 @@ void read_files(string folder) // folder is inner folder (ex. ebay.com) ./data/2
         // {
         //     sscanf("\"%s\": \"%s\"")
         // }
-        
+
         it = new item(folder, atoi(name.c_str()));
 
         long length;
-        fseek (stream, 0, SEEK_END);
+        fseek(stream, 0, SEEK_END);
         length = ftell(stream);
         fseek(stream, 0, SEEK_SET);
-        buffer = (char*)malloc(length);
-        if(buffer)
+        buffer = (char *)malloc(length);
+        if (buffer)
         {
-          fread(buffer, 1, length, stream);
+            fread(buffer, 1, length, stream);
         }
-        fclose (stream);
+        fclose(stream);
 
         s = strtok(buffer, "{},:\n");
         spec_list = new list(NULL);
 
-        while(s!=NULL)
+        while (s != NULL)
         {
-            sp=new spec;
+            sp = new spec;
             sp->s_name = s;
             s = strtok(NULL, "{},:\n");
             sp->s_info = s;
@@ -137,6 +131,38 @@ void read_files(string folder) // folder is inner folder (ex. ebay.com) ./data/2
         //insert speps into item
         //insert item into our database
         free(buffer);
+    }
+}
+
+int hashfunction(Pointer key)
+{
+    string str=*(string*)key;
+    unsigned int hash = 15, M = 14;
+    for (int i = 0; i < str.size(); ++i)
+        hash = M * hash + str[i];
+    return hash % HT_SIZE;
+}
+
+void destroy(Pointer value)
+{
+    delete value;
+}
+
+HashTable read_all_folders(string dir_name)
+{
+    HashTable ht=new hashtable(destroy,hashfunction);
+    struct dirent *de;
+    DIR *dr = opendir(dir_name.c_str());
+    if (!dr)
+    {
+        perror(dir_name.c_str());
+        return 0;
+    }
+    while ((de = readdir(dr)) != NULL)
+    {
+        if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
+            continue;
+        read_files(de->d_name,ht);
     }
 }
 

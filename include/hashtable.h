@@ -19,18 +19,18 @@ struct hashtable_node
 
 typedef int (*hashFunc)(Pointer value);
 
-typedef hashtable* HT;
+typedef hashtable* HashTable;
+typedef hashtable_node* HashTable_Node;
 
 class hashtable
 {
     List table[HT_SIZE];
     DestroyFunc destroy_value; // function that distroys an element value
-    CompareFunc compare;
     hashFunc hashfunction; 
 public:
-    hashtable(DestroyFunc destroy_value,hashFunc hashfunction,CompareFunc compare);
+    hashtable(DestroyFunc destroy_value,hashFunc hashfunction);
     ~hashtable();
-    Pointer search(Pointer value);
+    Pointer search(Pointer value,CompareFunc compare);
     void insert(hashtable_node* value);
 };
 

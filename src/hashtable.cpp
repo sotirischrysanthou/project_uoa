@@ -8,11 +8,10 @@
 
 using namespace std;
 
-hashtable::hashtable(DestroyFunc destroy_value,hashFunc hashfunction,CompareFunc compare)
+hashtable::hashtable(DestroyFunc destroy_value,hashFunc hashfunction)
 {
     this->destroy_value=destroy_value;
     this->hashfunction=hashfunction;
-    this->compare=compare;
 
     for (int i = 0; i < HT_SIZE; i++)
     {
@@ -28,7 +27,7 @@ hashtable::~hashtable()
     }
 }
 
-Pointer hashtable::search(Pointer key)
+Pointer hashtable::search(Pointer key,CompareFunc compare)
 {
     List chain=table[hashfunction(key)];
     return chain->list_find(key,compare);
