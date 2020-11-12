@@ -86,43 +86,21 @@ void read_files(string folder, HashTable htable) // folder is inner folder (ex. 
 
     dir = opendir(folder.c_str());
     dir_item = readdir(dir);
-<<<<<<< HEAD
-    item *it;
-    spec *sp;
-    char *s;
+    item* it;
+    List spec_list;
+
     while (dir_item != NULL) // for every file in dir
+    {
         if (dir_item->d_type == DT_DIR) // skip . and ..
         {
             dir_item = readdir(dir);
             continue;
         }
         name = dir_item->d_name;
-<<<<<<< HEAD
-        stream = fopen(name.c_str(), "r");
-
-        // while(getline(&buffer,&buffer_size,stream)!=-1)
-        // {
-        //     sscanf("\"%s\": \"%s\"")
-        // }
-
-        it = new item(folder, atoi(name.c_str()));
-
-        long length;
-        fseek(stream, 0, SEEK_END);
-        length = ftell(stream);
-        fseek(stream, 0, SEEK_SET);
-        buffer = (char *)malloc(length);
-        if (buffer)
-        {
-            fread(buffer, 1, length, stream);
-        }
-        fclose(stream);
-=======
 
         spec_list = parse(name);
         if (spec_list==NULL)
             continue;
->>>>>>> 2caa594780b81aaf3a7c34bb480aeba882e90915
 
         it = new item(folder, atoi(name.c_str()));
         //insert speps into item
