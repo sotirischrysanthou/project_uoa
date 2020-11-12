@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "item.h"
 #include "parser.h"
+#include "compare_funcs.h"
 #include "../include/hashtable.h"
 
 void foo(List main_l, List to_del_l)
@@ -71,27 +72,23 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
-HT read_all_folders()
-{
-
-}
-
-void read_files(string folder) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+/* returns 0 for success or 1 for failure */
+int read_files(string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
-    FILE *stream;
-    char *buffer = NULL;
-    size_t buffer_size = 0;
 
     string name;
     int id;
 
+    avl_tree* tree = new avl_tree();
+    HashTable_Node ht_n = new hashtable_node();
+    ht_n->key = new string(folder);
+    ht_n->value = tree;
+
     dir = opendir(folder.c_str());
     dir_item = readdir(dir);
     item* it;
-    spec* sp;
-    char *s;
     List spec_list;
 
     while (dir_item != NULL) // for every file in dir
@@ -102,42 +99,27 @@ void read_files(string folder) // folder is inner folder (ex. ebay.com) ./data/2
             continue;
         }
         name = dir_item->d_name;
-        stream = fopen(name.c_str(), "r");
 
-        // while(getline(&buffer,&buffer_size,stream)!=-1)
-        // {
-        //     sscanf("\"%s\": \"%s\"")
-        // }
-        
+        spec_list = parse(name);
+        if (spec_list==NULL)
+        {
+            delete ht_n->key;
+            delete ht_n;
+            delete tree;
+            return 1;
+        }
+
         it = new item(folder, atoi(name.c_str()));
-
-        long length;
-        fseek (stream, 0, SEEK_END);
-        length = ftell(stream);
-        fseek(stream, 0, SEEK_SET);
-        buffer = (char*)malloc(length);
-        if(buffer)
-        {
-          fread(buffer, 1, length, stream);
-        }
-        fclose (stream);
-
-        s = strtok(buffer, "{},:\n");
-        spec_list = new list(NULL);
-
-        while(s!=NULL)
-        {
-            sp=new spec;
-            sp->s_name = s;
-            s = strtok(NULL, "{},:\n");
-            sp->s_info = s;
-            s = strtok(NULL, "{},:\n");
-        }
-
         //insert speps into item
+        it->set_specs(spec_list);
+
+        //insert item into tree
+        tree->insert(it, cmp_avl_insert);
+
         //insert item into our database
-        free(buffer);
     }
+    htable->insert(ht_n);
+    return 0;
 }
 
 int main(int argc, char const *argv[])

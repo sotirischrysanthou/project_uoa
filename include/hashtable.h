@@ -19,7 +19,8 @@ struct hashtable_node
 
 typedef int (*hashFunc)(Pointer value);
 
-typedef hashtable* HT;
+typedef hashtable* HashTable;
+typedef hashtable_node* HashTable_Node;
 
 class hashtable
 {
