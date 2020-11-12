@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "item.h"
-#include "hashtable.h"
 #include "parser.h"
+#include "../include/hashtable.h"
 
 void foo(List main_l, List to_del_l)
 {
@@ -44,9 +44,7 @@ int list_cmp(Pointer l1, Pointer l2)
         return 1;
 }
 
-int site_cmp(Pointer p1, Pointer p2)
-{
-}
+
 
 void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
 {
@@ -71,6 +69,11 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
         }
     }
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
+}
+
+HT read_all_folders()
+{
+
 }
 
 int main(int argc, char const *argv[])

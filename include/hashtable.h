@@ -19,6 +19,8 @@ struct hashtable_node
 
 typedef int (*hashFunc)(Pointer value);
 
+typedef hashtable* HT;
+
 class hashtable
 {
     List table[HT_SIZE];
