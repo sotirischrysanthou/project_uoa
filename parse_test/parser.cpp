@@ -371,16 +371,16 @@ void print_table(List l)
     }
 }
 
-// int main()
-// {
-//     List json;
-//     json = parse("j.json");
-//     if(json==NULL)
-//     {
-//         printf("file dropped\n");
-//         return 0;
-//     }
-//     printf("size of list: %d\n", json->list_size());
-//     print_pair(json);
-//     return 0;
-// }
+int main()
+{
+    List json;
+    json = parse("j.json");
+    if(json==NULL)
+    {
+        printf("file dropped\n");
+        return 0;
+    }
+    printf("size of list: %d\n", json->list_size());
+    print_pair(json);
+    return 0;
+}
