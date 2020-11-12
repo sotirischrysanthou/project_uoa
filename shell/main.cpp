@@ -72,8 +72,7 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
-/* returns 0 for success or 1 for failure */
-int read_files(string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+void read_files(string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
@@ -102,12 +101,7 @@ int read_files(string folder, HashTable htable) // folder is inner folder (ex. e
 
         spec_list = parse(name);
         if (spec_list==NULL)
-        {
-            delete ht_n->key;
-            delete ht_n;
-            delete tree;
-            return 1;
-        }
+            continue;
 
         it = new item(folder, atoi(name.c_str()));
         //insert speps into item
@@ -119,7 +113,6 @@ int read_files(string folder, HashTable htable) // folder is inner folder (ex. e
         //insert item into our database
     }
     htable->insert(ht_n);
-    return 0;
 }
 
 int main(int argc, char const *argv[])
