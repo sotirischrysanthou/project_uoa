@@ -152,6 +152,9 @@ HashTable read_all_folders(string dir_name)
     return ht;
 }
 
+void read_csv()
+{}
+
 int main(int argc, char const *argv[])
 {
 

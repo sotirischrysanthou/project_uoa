@@ -1,0 +1,10 @@
+#include <iostream>
+#include <dirent.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include "item.h"
+#include "parser.h"
+#include "compare_funcs.h"
+#include "../include/hashtable.h"
+#include "compare_funcs.h"
