@@ -45,22 +45,41 @@ json_table_node *get_number()
     return new_node;
 }
 
+int end_of_string()
+{
+    for (; file_con[ch] != '\"'; ch++)
+    {
+        if (file_con[ch] == '\n')
+            return 1;
+    }
+    int i = ch-1;
+    int counter = 0;
+    while (file_con[i] == '\\')
+    {
+        counter++;
+        i--;
+    }
+    if (counter % 2 == 0)
+        return 0;
+    ch++;
+    return end_of_string();
+}
+
 string get_string()
 {
     int begin = ch, end;
 
-    for (; !(file_con[ch] == '\"' && (file_con[ch - 1] != '\\' || (file_con[ch - 1] == '\\' && file_con[ch - 2] == '\\'))); ch++)
+    if (end_of_string())
     {
-        if (file_con[ch] == '\n')
-        {
-            printf("get_string error\n");
-            return "ERROR_PARSING_STRING";
-        }
+        printf("get_string error\n");
+        return "ERROR_PARSING_STRING";
     }
+
     end = ch;
     ch++;
     return file_con.substr(begin, end - begin);
 }
+
 
 j_pair *json_pair()
 {
@@ -115,7 +134,7 @@ j_pair *json_pair()
         new_pair->value = new string(get_string());
         if ((*(string*)(new_pair->value)).compare("ERROR_PARSING_STRING")==0)
         {
-            delete new_pair->value;
+            delete (string*)(new_pair->value);
             delete new_pair;
             return NULL;
         }
@@ -205,7 +224,7 @@ json_table_node *json_table()
         new_node->value = new string(get_string());
         if ((*(string*)new_node->value).compare("ERROR_PARSING_STRING")==0)
         {
-            delete new_node->value;
+            delete (string*)(new_node->value);
             delete new_node;
             return NULL;
         }
@@ -277,7 +296,8 @@ List create_jTable()
 List parse(string filename)
 {
     l = new list(NULL);
-    FILE *stream = fopen(filename.c_str(), "r");
+    FILE *stream = NULL;
+    stream = fopen(filename.c_str(), "r");
     char *buffer = NULL;
     long length;
     fseek(stream, 0, SEEK_END);
@@ -289,6 +309,9 @@ List parse(string filename)
         fread(buffer, 1, length, stream);
     }
     file_con = buffer;
+    free(buffer);
+    fclose(stream);
+    ch=0;
     json_con = create_jList_of_pairs();
     if(json_con==NULL)
     {

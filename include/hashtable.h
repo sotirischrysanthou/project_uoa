@@ -11,16 +11,17 @@ using namespace std;
 #define  HT_SIZE 100
 
 
+
+typedef int (*hashFunc)(Pointer value);
+
+typedef class hashtable* HashTable;
+typedef struct hashtable_node* HashTable_Node;
+
 struct hashtable_node
 {
     Pointer key;
     Pointer value;
 };
-
-typedef int (*hashFunc)(Pointer value);
-
-typedef hashtable* HashTable;
-typedef hashtable_node* HashTable_Node;
 
 class hashtable
 {

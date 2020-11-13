@@ -17,5 +17,5 @@ int cmp_avl_insert(Pointer to_insert,Pointer value)
 // to_find: string     value : hashtable_node
 int cmp_hashtable_search(Pointer to_find,Pointer value)
 {
-    ((string*)to_find)->compare(*(string*)(((hashtable_node*)value)->key));
+    return ((string*)to_find)->compare(*(string*)(((hashtable_node*)value)->key));
 }

@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "item.h"
 #include "parser.h"
 #include "compare_funcs.h"
@@ -71,20 +72,19 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
-void read_files(string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+void read_files(string main_folder,string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
 
     string name;
-    int id;
 
     avl_tree* tree = new avl_tree();
     HashTable_Node ht_n = new hashtable_node();
     ht_n->key = new string(folder);
     ht_n->value = tree;
 
-    dir = opendir(folder.c_str());
+    dir = opendir((main_folder+"/"+folder).c_str());
     dir_item = readdir(dir);
     item* it;
     List spec_list;
@@ -97,12 +97,15 @@ void read_files(string folder, HashTable htable) // folder is inner folder (ex. 
             continue;
         }
         name = dir_item->d_name;
-
-        spec_list = parse(name);
+        spec_list = parse(main_folder+"/"+folder+"/"+dir_item->d_name);
+        
         if (spec_list==NULL)
+        {
+            // sleep(3);
+            dir_item = readdir(dir);
             continue;
-
-        it = new item(folder, atoi(name.c_str()));
+        }
+        it = new item(folder, atoi(name.erase(name.size()-5).c_str()));
         //insert speps into item
         it->set_specs(spec_list);
 
@@ -110,6 +113,8 @@ void read_files(string folder, HashTable htable) // folder is inner folder (ex. 
         tree->insert(it, cmp_avl_insert);
 
         //insert item into our database
+
+        dir_item = readdir(dir);
     }
     htable->insert(ht_n);
 }
@@ -117,15 +122,15 @@ void read_files(string folder, HashTable htable) // folder is inner folder (ex. 
 int hashfunction(Pointer key)
 {
     string str=*(string*)key;
-    unsigned int hash = 15, M = 14;
-    for (int i = 0; i < str.size(); ++i)
+    uint hash = 15, M = 14;
+    for (uint i = 0; i < str.size(); ++i)
         hash = M * hash + str[i];
     return hash % HT_SIZE;
 }
 
 void destroy(Pointer value)
 {
-    delete value;
+    delete (HashTable_Node)value;
 }
 
 HashTable read_all_folders(string dir_name)
@@ -136,14 +141,15 @@ HashTable read_all_folders(string dir_name)
     if (!dr)
     {
         perror(dir_name.c_str());
-        return 0;
+        return NULL;
     }
     while ((de = readdir(dr)) != NULL)
     {
         if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
-        read_files(de->d_name,ht);
+        read_files(dir_name,de->d_name,ht);
     }
+    return ht;
 }
 
 int main(int argc, char const *argv[])
@@ -185,5 +191,7 @@ int main(int argc, char const *argv[])
     printf("\n\n");
     print_commons(visited_lists, d.get_common_list(), stdout);
 
+    HashTable HT=read_all_folders("./data/2013_camera_specs");
+    delete HT;
     return 0;
 }

@@ -5,7 +5,7 @@ item::item(string fldr, int i):folder(fldr), id(i)
     common_list=new list(NULL);
     common_list->list_insert_next(LIST_BOF,this);
     
-    printf("Debug!!%s//%d   %d  \n",folder.c_str(),id,common_list->list_size());
+    // printf("Debug!!%s//%d   %d  \n",folder.c_str(),id,common_list->list_size());
 }
 
 List item::get_common_list()
