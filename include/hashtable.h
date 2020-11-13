@@ -8,7 +8,7 @@ using namespace std;
 
 #include "List.h"
 
-#define  HT_SIZE 100
+#define  HT_SIZE 10
 
 
 

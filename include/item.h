@@ -20,11 +20,11 @@ class item
     List common_list;
     List specs;
 public:
-    item(string fldr, int i);
+    item(string fldr, int i, List spec_list);
     List get_common_list();
     int get_item_id();
     string get_item_folder();
     string get_item_full_id();
     void change_common_list(List new_list);
-    void set_specs(List s_list);
+
 };
