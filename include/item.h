@@ -1,3 +1,6 @@
+#ifndef ITEM
+#define ITEM
+
 #include "List.h"
 using namespace std;
 
@@ -28,3 +31,5 @@ public:
     void change_common_list(List new_list);
 
 };
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef PARSER
+#define PARSER
+
 #include "common_types.h"
 #include "List.h"
 
@@ -27,3 +30,5 @@ List create_jList_of_pairs();
 json_table_node *json_table();
 List create_jTable();
 List parse(string filename);
+
+#endif
