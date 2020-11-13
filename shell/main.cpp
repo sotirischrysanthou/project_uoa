@@ -99,16 +99,8 @@ void read_files(string main_folder,string folder, HashTable htable) // folder is
         name = dir_item->d_name;
         spec_list = parse(main_folder+"/"+folder+"/"+dir_item->d_name);
         
-        if (spec_list==NULL)
-        {
-            // sleep(3);
-            dir_item = readdir(dir);
-            continue;
-        }
-        it = new item(folder, atoi(name.erase(name.size()-5).c_str()));
-        //insert speps into item
-        it->set_specs(spec_list);
-
+        it = new item(folder, atoi(name.erase(name.size()-5).c_str()),spec_list);
+        
         //insert item into tree
         tree->insert(it, cmp_avl_insert);
 
@@ -155,10 +147,10 @@ HashTable read_all_folders(string dir_name)
 int main(int argc, char const *argv[])
 {
 
-    item a("a", 10);
-    item b("b", 20);
-    item c("c", 30);
-    item d("d", 40);
+    item a("a", 10,NULL);
+    item b("b", 20,NULL);
+    item c("c", 30,NULL);
+    item d("d", 40,NULL);
     foo(a.get_common_list(), b.get_common_list());
     foo(c.get_common_list(), d.get_common_list());
     printf("\n\na\n");
