@@ -21,6 +21,7 @@ typedef int (*CompareFunc)(Pointer a, Pointer b);
 // Pointer to function that distroy an element value
 typedef void (*DestroyFunc)(Pointer value);
 
+typedef void (*GeneralFunc)(Pointer value);
 
 
 

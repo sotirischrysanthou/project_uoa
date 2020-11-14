@@ -1,13 +1,3 @@
-#include <iostream>
-#include <dirent.h>
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-#include "item.h"
-#include "parser.h"
-#include "compare_funcs.h"
-#include "../include/hashtable.h"
-#include "compare_funcs.h"
 #include "functions.h"
 
 
@@ -19,7 +9,7 @@ int main(int argc, char const *argv[])
     item c("c", 30,NULL);
     item d("d", 40,NULL);
     foo(a.get_common_list(), b.get_common_list());
-    foo(c.get_common_list(), d.get_common_list());
+    // foo(c.get_common_list(), d.get_common_list());
     printf("\n\na\n");
     print_list(a.get_common_list());
     printf("\nb\n");
@@ -53,6 +43,9 @@ int main(int argc, char const *argv[])
     HashTable HT=read_all_folders("./data/2013_camera_specs");
     printf("Read all json files\n");
     read_csv("./data/sigmod_medium_labelled_dataset.csv",HT);
+    FILE *output_file= fopen("./output_file.txt","w");
+    print_all(HT,output_file);
+    fclose(output_file);
     delete HT;
     return 0;
 }

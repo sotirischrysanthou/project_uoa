@@ -159,3 +159,17 @@ Pointer avl_tree::search(Pointer value, CompareFunc cmp)
     return rec_search(root, value, cmp);
 }
 
+void rec_inorder(AvlNode node,GeneralFunc func)
+{
+    if(node==NULL)
+        return;
+    rec_inorder(node->left,func);
+    func(node->value);
+    rec_inorder(node->right,func);
+}
+
+void avl_tree::inorder(GeneralFunc func)
+{
+    rec_inorder(root,func);
+}
+

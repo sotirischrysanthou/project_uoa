@@ -33,6 +33,7 @@ public:
     ~hashtable();
     Pointer search(Pointer value,CompareFunc compare);
     void insert(hashtable_node* value);
+    List return_list();
 };
 
 #endif

@@ -15,3 +15,4 @@ void print_list(List list_to_print);
 void print_commons(List visited_lists, List list_to_visit, FILE *output_file);
 HashTable read_all_folders(string dir_name);
 void read_csv(string filename, HashTable ht);
+void print_all(HashTable ht,FILE *output_file=stdout);

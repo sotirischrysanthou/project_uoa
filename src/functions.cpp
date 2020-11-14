@@ -2,6 +2,8 @@
 
 void foo(List main_l, List to_del_l)
 {
+    if (main_l == to_del_l)
+        return;
     item *tempItem;
     ListNode tempNode = to_del_l->list_first();
     do
@@ -63,21 +65,21 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
-void read_files(string main_folder,string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+void read_files(string main_folder, string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
 
     string name;
 
-    avl_tree* tree = new avl_tree();
+    avl_tree *tree = new avl_tree();
     HashTable_Node ht_n = new hashtable_node();
     ht_n->key = new string(folder);
     ht_n->value = tree;
 
-    dir = opendir((main_folder+"/"+folder).c_str());
+    dir = opendir((main_folder + "/" + folder).c_str());
     dir_item = readdir(dir);
-    item* it;
+    item *it;
     List spec_list;
 
     while (dir_item != NULL) // for every file in dir
@@ -88,10 +90,10 @@ void read_files(string main_folder,string folder, HashTable htable) // folder is
             continue;
         }
         name = dir_item->d_name;
-        spec_list = parse(main_folder+"/"+folder+"/"+dir_item->d_name);
-        
-        it = new item(folder, atoi(name.erase(name.size()-5).c_str()),spec_list);
-        
+        spec_list = parse(main_folder + "/" + folder + "/" + dir_item->d_name);
+
+        it = new item(folder, atoi(name.erase(name.size() - 5).c_str()), spec_list);
+
         //insert item into tree
         tree->insert(it, cmp_avl_insert);
 
@@ -104,7 +106,7 @@ void read_files(string main_folder,string folder, HashTable htable) // folder is
 
 int hashfunction(Pointer key)
 {
-    string str=*(string*)key;
+    string str = *(string *)key;
     uint hash = 15, M = 14;
     for (uint i = 0; i < str.size(); ++i)
         hash = M * hash + str[i];
@@ -118,7 +120,7 @@ void destroy(Pointer value)
 
 HashTable read_all_folders(string dir_name)
 {
-    HashTable ht=new hashtable(destroy,hashfunction);
+    HashTable ht = new hashtable(destroy, hashfunction);
     struct dirent *de;
     DIR *dr = opendir(dir_name.c_str());
     if (!dr)
@@ -130,7 +132,7 @@ HashTable read_all_folders(string dir_name)
     {
         if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
-        read_files(dir_name,de->d_name,ht);
+        read_files(dir_name, de->d_name, ht);
     }
     return ht;
 }
@@ -143,39 +145,65 @@ void read_csv(string filename, HashTable ht)
     int num1, num2, similar, comma1, comma2, slash1, slash2;
     size_t buffer_size = 0;
     char *buffer = NULL;
-    FILE* stream = fopen(filename.c_str(), "r");
+    FILE *stream = fopen(filename.c_str(), "r");
     if (!stream)
     {
         printf("Error reading file: %s\n", filename.c_str());
         return;
     }
     getline(&buffer, &buffer_size, stream);
+    int c = 0;
     while (getline(&buffer, &buffer_size, stream) != -1)
     {
         line = buffer;
         slash1 = line.find("//");
-        comma1 = line.find(',',slash1);
+        comma1 = line.find(',', slash1);
         slash2 = line.find("//", comma1);
         comma2 = line.find(',', slash2);
 
-        name1=line.substr(0,slash1);
-        num1=stoi(line.substr(slash1+2,comma1-slash1+2));
-        name2=line.substr(comma1+1,slash2-comma1+1-2);
-        num2=stoi(line.substr(slash2+2,comma2-slash2+2));
-        similar=stoi(line.substr(comma2+1));
+        name1 = line.substr(0, slash1);
+        num1 = stoi(line.substr(slash1 + 2, comma1 - slash1 + 2));
+        name2 = line.substr(comma1 + 1, slash2 - comma1 + 1 - 2);
+        num2 = stoi(line.substr(slash2 + 2, comma2 - slash2 + 2));
+        similar = stoi(line.substr(comma2 + 1));
 
         // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
 
-        tree = (AvlTree)ht->search(&name1, cmp_hashtable_search);
-        it1 = (item*)tree->search(&num1, cmp_avl_search);
-        tree = (AvlTree)ht->search(&name2, cmp_hashtable_search);
-        it2 = (item*)tree->search(&num2, cmp_avl_search);
+        if (similar)
+        {
+            tree = (AvlTree)ht->search(&name1, cmp_hashtable_search);
+            it1 = (item *)tree->search(&num1, cmp_avl_search);
+            tree = (AvlTree)ht->search(&name2, cmp_hashtable_search);
+            it2 = (item *)tree->search(&num2, cmp_avl_search);
 
-        printf("item1: %s  ------------ item2: %s \n",it1->get_item_full_id().c_str(), it2->get_item_full_id().c_str());
+            // printf("item1: %s  ------------ item2: %s \n", it1->get_item_full_id().c_str(), it2->get_item_full_id().c_str());
 
-        foo(it1->get_common_list(), it2->get_common_list());
-
+            foo(it1->get_common_list(), it2->get_common_list());
+        }
     }
     fclose(stream);
-
 }
+
+List visited_lists;
+FILE *output;
+
+void print_all_commons(Pointer value)
+{
+    // printf("%s\n",((item*)value)->get_item_full_id().c_str());
+    print_commons(visited_lists,((item*)value)->get_common_list(),output);
+}
+
+void print_all(HashTable ht,FILE *output_file)
+{
+    visited_lists = new list(NULL);
+    output=output_file;
+    List trees = ht->return_list();
+    ListNode tempNode = trees->list_first();
+    while (tempNode != NULL)
+    {
+        ((AvlTree)(tempNode->value))->inorder(print_all_commons);
+        tempNode = trees->list_next(tempNode);
+    }
+}
+
+
