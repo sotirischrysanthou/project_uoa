@@ -135,5 +135,47 @@ HashTable read_all_folders(string dir_name)
     return ht;
 }
 
-void read_csv()
-{}
+void read_csv(string filename, HashTable ht)
+{
+    AvlTree tree;
+    item *it1, *it2;
+    string name1, name2, line;
+    int num1, num2, similar, comma1, comma2, slash1, slash2;
+    size_t buffer_size = 0;
+    char *buffer = NULL;
+    FILE* stream = fopen(filename.c_str(), "r");
+    if (!stream)
+    {
+        printf("Error reading file: %s\n", filename.c_str());
+        return;
+    }
+    getline(&buffer, &buffer_size, stream);
+    while (getline(&buffer, &buffer_size, stream) != -1)
+    {
+        line = buffer;
+        slash1 = line.find("//");
+        comma1 = line.find(',',slash1);
+        slash2 = line.find("//", comma1);
+        comma2 = line.find(',', slash2);
+
+        name1=line.substr(0,slash1);
+        num1=stoi(line.substr(slash1+2,comma1-slash1+2));
+        name2=line.substr(comma1+1,slash2-comma1+1-2);
+        num2=stoi(line.substr(slash2+2,comma2-slash2+2));
+        similar=stoi(line.substr(comma2+1));
+
+        // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
+
+        tree = (AvlTree)ht->search(&name1, cmp_hashtable_search);
+        it1 = (item*)tree->search(&num1, cmp_avl_search);
+        tree = (AvlTree)ht->search(&name2, cmp_hashtable_search);
+        it2 = (item*)tree->search(&num2, cmp_avl_search);
+
+        printf("item1: %s  ------------ item2: %s \n",it1->get_item_full_id().c_str(), it2->get_item_full_id().c_str());
+
+        foo(it1->get_common_list(), it2->get_common_list());
+
+    }
+    fclose(stream);
+
+}

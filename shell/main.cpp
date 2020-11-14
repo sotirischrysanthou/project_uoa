@@ -8,7 +8,7 @@
 #include "compare_funcs.h"
 #include "../include/hashtable.h"
 #include "compare_funcs.h"
-
+#include "functions.h"
 
 
 int main(int argc, char const *argv[])
@@ -51,6 +51,8 @@ int main(int argc, char const *argv[])
     print_commons(visited_lists, d.get_common_list(), stdout);
 
     HashTable HT=read_all_folders("./data/2013_camera_specs");
+    printf("Read all json files\n");
+    read_csv("./data/sigmod_medium_labelled_dataset.csv",HT);
     delete HT;
     return 0;
 }

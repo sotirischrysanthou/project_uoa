@@ -30,7 +30,8 @@ hashtable::~hashtable()
 Pointer hashtable::search(Pointer key,CompareFunc compare)
 {
     List chain=table[hashfunction(key)];
-    return chain->list_find(key,compare);
+    HashTable_Node temp = (HashTable_Node)chain->list_find(key,compare);
+    return temp->value;
 }
 
 void hashtable::insert(hashtable_node* value)
