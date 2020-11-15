@@ -1,6 +1,6 @@
 #include "functions.h"
 
-void foo(List main_l, List to_del_l)
+void similar_items(List main_l, List to_del_l)
 {
     if (main_l == to_del_l)
         return;
@@ -42,6 +42,7 @@ int list_cmp(Pointer l1, Pointer l2)
 
 void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
 {
+    /* if the item's similar list is already in our visited lists, no more actions are necessary */
     if (visited_lists->list_find(list_to_visit, list_cmp))
         return;
 
@@ -49,6 +50,8 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     item *itemOne = (item *)list_to_visit->list_node_value(nodeOne);
     ListNode nodeTwo = nodeOne;
     item *itemTwo = itemOne;
+    /* the last item in our list is the item itself,
+    because its the first one that was added and all further additions happen at the beginning */
     while (nodeOne != list_to_visit->list_last())
     {
         nodeTwo = list_to_visit->list_next(nodeTwo);
@@ -65,6 +68,7 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
+/* reads and parces all json files included in a folder */
 void read_files(string main_folder, string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
@@ -97,10 +101,9 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
         //insert item into tree
         tree->insert(it, cmp_avl_insert);
 
-        //insert item into our database
-
         dir_item = readdir(dir);
     }
+    //insert tree into our database
     htable->insert(ht_n);
 }
 
@@ -152,7 +155,6 @@ void read_csv(string filename, HashTable ht)
         return;
     }
     getline(&buffer, &buffer_size, stream);
-    int c = 0;
     while (getline(&buffer, &buffer_size, stream) != -1)
     {
         line = buffer;
@@ -178,14 +180,14 @@ void read_csv(string filename, HashTable ht)
 
             // printf("item1: %s  ------------ item2: %s \n", it1->get_item_full_id().c_str(), it2->get_item_full_id().c_str());
 
-            foo(it1->get_common_list(), it2->get_common_list());
+            similar_items(it1->get_common_list(), it2->get_common_list());
         }
     }
     fclose(stream);
 }
 
-List visited_lists;
-FILE *output;
+List visited_lists; /* the pointer is common for all functions to use */
+FILE *output; /* the file is common for all functions to use */
 
 void print_all_commons(Pointer value)
 {

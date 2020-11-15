@@ -23,12 +23,17 @@ struct json_table_node
     Pointer value;
 };
 
+/* parse ints, floats */
 json_table_node *get_number();
+/* parse strings */
 string get_string();
+/* parse pairs ex. { "A" : a, "B" : b } */
 j_pair *json_pair();
 List create_jList_of_pairs();
+/* parse tables ex. [a, b, c] */
 json_table_node *json_table();
 List create_jTable();
+/* parse the file and insert all specs into list that is returned */
 List parse(string filename);
 
 #endif

@@ -18,10 +18,10 @@ using namespace std;
 
 class item
 {
-    string folder;
-    int id;
-    List common_list;
-    List specs;
+    string folder; /* ex. "buy.net" */
+    int id; /* ex. 4233 */
+    List common_list; /* a list of all common items */
+    List specs; /* a list of all of the item's specs, parsed from the json file */
 public:
     item(string fldr, int i, List spec_list);
     List get_common_list();

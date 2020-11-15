@@ -393,17 +393,3 @@ void print_table(List l)
         lnode = l->list_next(lnode);
     }
 }
-
-// int main()
-// {
-//     List json;
-//     json = parse("j.json");
-//     if(json==NULL)
-//     {
-//         printf("file dropped\n");
-//         return 0;
-//     }
-//     printf("size of list: %d\n", json->list_size());
-//     print_pair(json);
-//     return 0;
-// }
