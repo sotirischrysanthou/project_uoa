@@ -137,6 +137,7 @@ void avl_tree::del(AvlNode temp) {
       return;
     del(temp->left);
     del(temp->right);
+    destroy_value(temp->value);
     delete temp;
 }
 

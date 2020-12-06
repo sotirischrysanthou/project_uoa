@@ -14,7 +14,7 @@ struct j_pair
 {
     char type;
     Pointer value;
-    string title;
+    string *title;
 };
 
 struct json_table_node

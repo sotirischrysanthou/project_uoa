@@ -30,14 +30,16 @@ class avl_tree
     AvlNode rec_insert(AvlNode curr, Pointer value, CompareFunc cmp);
     void del(AvlNode temp);
     Pointer rec_search(AvlNode node, Pointer value, CompareFunc cmp);
+    DestroyFunc destroy_value;
 
 
 public:
     void insert(Pointer value,CompareFunc cmp);
     Pointer search(Pointer value, CompareFunc cmp);
     void inorder(GeneralFunc func);
-    avl_tree()
+    avl_tree(DestroyFunc destroy_value)
     {
+        this->destroy_value=destroy_value;
         root=NULL;
     }
     ~avl_tree()

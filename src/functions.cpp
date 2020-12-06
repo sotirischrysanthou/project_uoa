@@ -1,6 +1,6 @@
 #include "functions.h"
 
-void similar_items(List main_l, List to_del_l)
+void foo(List main_l, List to_del_l)
 {
     if (main_l == to_del_l)
         return;
@@ -42,7 +42,6 @@ int list_cmp(Pointer l1, Pointer l2)
 
 void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
 {
-    /* if the item's similar list is already in our visited lists, no more actions are necessary */
     if (visited_lists->list_find(list_to_visit, list_cmp))
         return;
 
@@ -50,8 +49,6 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     item *itemOne = (item *)list_to_visit->list_node_value(nodeOne);
     ListNode nodeTwo = nodeOne;
     item *itemTwo = itemOne;
-    /* the last item in our list is the item itself,
-    because its the first one that was added and all further additions happen at the beginning */
     while (nodeOne != list_to_visit->list_last())
     {
         nodeTwo = list_to_visit->list_next(nodeTwo);
@@ -68,7 +65,23 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
     visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
 }
 
-/* reads and parces all json files included in a folder */
+void destroy_item(Pointer value)
+{
+    delete (item *)value;
+}
+
+void del_item_ht(Pointer value)
+{
+    delete (int*)((HashTable_Node)value)->key;
+    delete (item *)((HashTable_Node)value)->value;
+    delete (HashTable_Node)value;
+}
+
+int hashfunction_int(Pointer key)
+{
+    return (*(int *)key) % HT_SIZE;
+}
+
 void read_files(string main_folder, string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
@@ -76,16 +89,17 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
 
     string name;
 
-    avl_tree *tree = new avl_tree();
+    // avl_tree *tree = new avl_tree(destroy_item);
+    HashTable ht_items = new hashtable(del_item_ht, hashfunction_int);
     HashTable_Node ht_n = new hashtable_node();
     ht_n->key = new string(folder);
-    ht_n->value = tree;
+    ht_n->value = ht_items;
 
     dir = opendir((main_folder + "/" + folder).c_str());
     dir_item = readdir(dir);
     item *it;
-    List spec_list;
-
+    List spec_list=NULL;
+    int counter = 0;
     while (dir_item != NULL) // for every file in dir
     {
         if (dir_item->d_type == DT_DIR) // skip . and ..
@@ -95,16 +109,32 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
         }
         name = dir_item->d_name;
         spec_list = parse(main_folder + "/" + folder + "/" + dir_item->d_name);
-
         it = new item(folder, atoi(name.erase(name.size() - 5).c_str()), spec_list);
-
+        clock_t t;
+        HashTable_Node ht_item_n = new hashtable_node();
+        ht_item_n->key = new int(it->get_item_id());
+        ht_item_n->value = it;
+        ht_items->insert(ht_item_n);
+        // if (folder.compare("www.ebay.com") == 0)
+        //     t = clock();
         //insert item into tree
-        tree->insert(it, cmp_avl_insert);
+        // tree->insert(it, cmp_avl_insert);
+        // if (folder.compare("www.ebay.com") == 0)
+        // {
+        //     counter++;
+        //     t = clock() - t;
+        //     double time_taken = ((double)t) / CLOCKS_PER_SEC;
+        //     if (counter > 5000 && counter < 5500)
+        //         printf("time : %f \n", time_taken);
+        // }
+        //insert item into our database
 
         dir_item = readdir(dir);
     }
-    //insert tree into our database
+    // if (folder.compare("www.ebay.com") == 0)
+    //     cout << "counter: " << counter << endl;
     htable->insert(ht_n);
+    closedir(dir);
 }
 
 int hashfunction(Pointer key)
@@ -116,14 +146,16 @@ int hashfunction(Pointer key)
     return hash % HT_SIZE;
 }
 
-void destroy(Pointer value)
+void del_main_ht(Pointer value)
 {
+    delete (string *)((HashTable_Node)value)->key;
+    delete (HashTable)((HashTable_Node)value)->value;
     delete (HashTable_Node)value;
 }
 
 HashTable read_all_folders(string dir_name)
 {
-    HashTable ht = new hashtable(destroy, hashfunction);
+    HashTable ht = new hashtable(del_main_ht, hashfunction);
     struct dirent *de;
     DIR *dr = opendir(dir_name.c_str());
     if (!dr)
@@ -137,12 +169,19 @@ HashTable read_all_folders(string dir_name)
             continue;
         read_files(dir_name, de->d_name, ht);
     }
+    closedir(dr);
     return ht;
+}
+
+int ht_search_item(Pointer id_to_find, Pointer ht_node)
+{
+    return (*(int *)(id_to_find)) - (*(int*)(((HashTable_Node)ht_node)->key));
 }
 
 void read_csv(string filename, HashTable ht)
 {
     AvlTree tree;
+    HashTable ht_items;
     item *it1, *it2;
     string name1, name2, line;
     int num1, num2, similar, comma1, comma2, slash1, slash2;
@@ -155,6 +194,7 @@ void read_csv(string filename, HashTable ht)
         return;
     }
     getline(&buffer, &buffer_size, stream);
+    int c = 0;
     while (getline(&buffer, &buffer_size, stream) != -1)
     {
         line = buffer;
@@ -173,39 +213,52 @@ void read_csv(string filename, HashTable ht)
 
         if (similar)
         {
-            tree = (AvlTree)ht->search(&name1, cmp_hashtable_search);
-            it1 = (item *)tree->search(&num1, cmp_avl_search);
-            tree = (AvlTree)ht->search(&name2, cmp_hashtable_search);
-            it2 = (item *)tree->search(&num2, cmp_avl_search);
+            ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
+            it1 = (item *)ht_items->search(&num1, ht_search_item);
+            ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
+            it2 = (item *)ht_items->search(&num2, ht_search_item);
 
             // printf("item1: %s  ------------ item2: %s \n", it1->get_item_full_id().c_str(), it2->get_item_full_id().c_str());
 
-            similar_items(it1->get_common_list(), it2->get_common_list());
+            foo(it1->get_common_list(), it2->get_common_list());
         }
     }
+    free(buffer);
     fclose(stream);
 }
 
-List visited_lists; /* the pointer is common for all functions to use */
-FILE *output; /* the file is common for all functions to use */
+List visited_lists;
+FILE *output;
+
+void destroy_list(Pointer value)
+{
+    delete (List)value;
+}
 
 void print_all_commons(Pointer value)
 {
     // printf("%s\n",((item*)value)->get_item_full_id().c_str());
-    print_commons(visited_lists,((item*)value)->get_common_list(),output);
+    print_commons(visited_lists, ((item *)value)->get_common_list(), output);
 }
 
-void print_all(HashTable ht,FILE *output_file)
+void print_all(HashTable ht, FILE *output_file)
 {
-    visited_lists = new list(NULL);
-    output=output_file;
-    List trees = ht->return_list();
-    ListNode tempNode = trees->list_first();
+    visited_lists = new list(destroy_list);
+    output = output_file;
+    List hts = ht->return_list();
+    ListNode tempNode = hts->list_first();
     while (tempNode != NULL)
     {
-        ((AvlTree)(tempNode->value))->inorder(print_all_commons);
-        tempNode = trees->list_next(tempNode);
+        List items_list = ((HashTable)tempNode->value)->return_list();
+        ListNode tempNode1 = items_list->list_first();
+        while (tempNode1 != NULL)
+        {
+            print_all_commons(tempNode1->value);
+            tempNode1 = items_list->list_next(tempNode1);
+        }
+        tempNode = hts->list_next(tempNode);
+        delete items_list;
     }
+    delete hts;
+    delete visited_lists;
 }
-
-

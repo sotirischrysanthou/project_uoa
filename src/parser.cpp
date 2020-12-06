@@ -8,6 +8,69 @@ int pos;
 /* j_pairs list */
 List json_con;
 
+void del_j_pair(Pointer node)
+{
+    if (((j_pair *)node)->type == INTEGER)
+    {
+        delete ((j_pair *)node)->title;
+        delete (int *)(((j_pair *)node)->value);
+        delete (j_pair *)node;
+    }
+    else if (((j_pair *)node)->type == FLOAT)
+    {
+        delete ((j_pair *)node)->title;
+        delete (float *)(((j_pair *)node)->value);
+        delete (j_pair *)node;
+    }
+    else if (((j_pair *)node)->type == STRING)
+    {
+        delete ((j_pair *)node)->title;
+        delete (string *)(((j_pair *)node)->value);
+        delete (j_pair *)node;
+    }
+    else if (((j_pair *)node)->type == PAIRS)
+    {
+        delete ((j_pair *)node)->title;
+        delete (j_pair *)(((j_pair *)node)->value);
+        delete (j_pair *)node;
+    }
+    else if (((j_pair *)node)->type == TABLE)
+    {
+        delete ((j_pair *)node)->title;
+        delete (List)(((j_pair *)node)->value);
+        delete (j_pair *)node;
+    }
+}
+
+void del_json_table_node(Pointer node)
+{
+    if (((json_table_node *)node)->type == INTEGER)
+    {
+        delete (int *)(((json_table_node *)node)->value);
+        delete (json_table_node *)node;
+    }
+    else if (((json_table_node *)node)->type == FLOAT)
+    {
+        delete (float *)(((json_table_node *)node)->value);
+        delete (json_table_node *)node;
+    }
+    else if (((json_table_node *)node)->type == STRING)
+    {
+        delete (string *)(((json_table_node *)node)->value);
+        delete (json_table_node *)node;
+    }
+    else if (((json_table_node *)node)->type == PAIRS)
+    {
+        delete (int *)(((j_pair *)node)->value);
+        delete (json_table_node *)node;
+    }
+    else if (((json_table_node *)node)->type == TABLE)
+    {
+        delete (json_table_node *)(((json_table_node *)node)->value);
+        delete (json_table_node *)node;
+    }
+}
+
 json_table_node *get_number()
 {
     json_table_node *new_node = new json_table_node;
@@ -23,7 +86,7 @@ json_table_node *get_number()
     if (dots_counter > 1 || (file_con[ch] != ' ' && file_con[ch] != '\t' && file_con[ch] != '\n' && file_con[ch] != ',' && file_con[ch] != ']'))
     {
         delete new_node;
-        printf("get_number error\n"); 
+        printf("get_number error\n");
         return NULL;
     }
 
@@ -52,7 +115,7 @@ int end_of_string()
         if (file_con[ch] == '\n')
             return 1;
     }
-    int i = ch-1;
+    int i = ch - 1;
     int counter = 0;
     while (file_con[i] == '\\')
     {
@@ -77,9 +140,10 @@ string get_string()
 
     end = ch;
     ch++;
-    return file_con.substr(begin, end - begin);
-}
 
+    return file_con.substr(begin, end - begin);
+    
+}
 
 j_pair *json_pair()
 {
@@ -87,8 +151,9 @@ j_pair *json_pair()
 
     ch++;
     new_pair = new j_pair;
-    new_pair->title = get_string();
-    if (new_pair->title.compare("ERROR_PARSING_STRING")==0)
+    new_pair->type=PAIRS;
+    new_pair->title = new string(get_string());
+    if (new_pair->title->compare("ERROR_PARSING_STRING") == 0)
     {
         delete new_pair;
         return NULL;
@@ -118,7 +183,7 @@ j_pair *json_pair()
     if (file_con[ch] >= '0' && file_con[ch] <= '9')
     {
         json_table_node *tNode = get_number();
-        if (tNode==NULL)
+        if (tNode == NULL)
         {
             delete new_pair;
             return NULL;
@@ -132,9 +197,9 @@ j_pair *json_pair()
         new_pair->type = STRING;
         ch++;
         new_pair->value = new string(get_string());
-        if ((*(string*)(new_pair->value)).compare("ERROR_PARSING_STRING")==0)
+        if ((*(string *)(new_pair->value)).compare("ERROR_PARSING_STRING") == 0)
         {
-            delete (string*)(new_pair->value);
+            delete (string *)(new_pair->value);
             delete new_pair;
             return NULL;
         }
@@ -144,7 +209,7 @@ j_pair *json_pair()
     {
         new_pair->type = PAIRS;
         new_pair->value = create_jList_of_pairs();
-        if(new_pair->value==NULL)
+        if (new_pair->value == NULL)
         {
             delete new_pair;
             return NULL;
@@ -155,7 +220,7 @@ j_pair *json_pair()
     {
         new_pair->type = TABLE;
         new_pair->value = create_jTable();
-        if (new_pair->value==NULL)
+        if (new_pair->value == NULL)
         {
             delete new_pair;
             return NULL;
@@ -167,7 +232,7 @@ j_pair *json_pair()
 
 List create_jList_of_pairs()
 {
-    List pList = new list(NULL);
+    List pList = new list(del_j_pair);
     while (file_con[ch] != '}')
     {
         ch++;
@@ -183,7 +248,7 @@ List create_jList_of_pairs()
         if (file_con[ch] == '}')
             break;
         j_pair *temp = json_pair();
-        if(temp==NULL)
+        if (temp == NULL)
         {
             delete pList;
             return NULL;
@@ -205,12 +270,12 @@ List create_jList_of_pairs()
 
 json_table_node *json_table()
 {
-    json_table_node *new_node=new json_table_node;
+    json_table_node *new_node = new json_table_node;
 
     if (file_con[ch] >= '0' && file_con[ch] <= '9')
     {
         new_node = get_number();
-        if(new_node==NULL)
+        if (new_node == NULL)
         {
             delete new_node;
             return NULL;
@@ -222,9 +287,9 @@ json_table_node *json_table()
         new_node->type = STRING;
         ch++;
         new_node->value = new string(get_string());
-        if ((*(string*)new_node->value).compare("ERROR_PARSING_STRING")==0)
+        if ((*(string *)new_node->value).compare("ERROR_PARSING_STRING") == 0)
         {
-            delete (string*)(new_node->value);
+            delete (string *)(new_node->value);
             delete new_node;
             return NULL;
         }
@@ -234,7 +299,7 @@ json_table_node *json_table()
     {
         new_node->type = PAIRS;
         new_node->value = create_jList_of_pairs();
-        if(new_node->value==NULL)
+        if (new_node->value == NULL)
         {
             delete new_node;
             return NULL;
@@ -245,7 +310,7 @@ json_table_node *json_table()
     {
         new_node->type = TABLE;
         new_node->value = create_jTable();
-        if (new_node->value==NULL)
+        if (new_node->value == NULL)
         {
             delete new_node;
             return NULL;
@@ -257,7 +322,7 @@ json_table_node *json_table()
 
 List create_jTable()
 {
-    List tList = new list(NULL);
+    List tList = new list(del_json_table_node);
     while (file_con[ch] != ']')
     {
         ch++;
@@ -272,8 +337,8 @@ List create_jTable()
         }
         if (file_con[ch] == ']')
             break;
-        json_table_node *temp=json_table();
-        if(temp==NULL)
+        json_table_node *temp = json_table();
+        if (temp == NULL)
         {
             delete tList;
             return NULL;
@@ -295,7 +360,6 @@ List create_jTable()
 
 List parse(string filename)
 {
-    l = new list(NULL);
     FILE *stream = NULL;
     stream = fopen(filename.c_str(), "r");
     char *buffer = NULL;
@@ -309,19 +373,17 @@ List parse(string filename)
         fread(buffer, 1, length, stream);
     }
     file_con = buffer;
+    ch = 0;
+    json_con = NULL;
+    json_con = create_jList_of_pairs();
     free(buffer);
     fclose(stream);
-    ch=0;
-    json_con = create_jList_of_pairs();
-    if(json_con==NULL)
+    if (json_con == NULL)
     {
-        delete l;
         return NULL;
     }
     return json_con;
 }
-
-
 
 /* ----------PRINTS----------- */
 
@@ -334,7 +396,7 @@ void print_pair(List l)
     while (lnode != NULL)
     {
         jpair = (j_pair *)lnode->value;
-        printf("%s: ", (jpair->title.c_str()));
+        printf("%s: ", (jpair->title->c_str()));
         switch (jpair->type)
         {
         case PAIRS:
@@ -360,14 +422,13 @@ void print_pair(List l)
     }
 }
 
-
 void print_table(List l)
 {
     json_table_node *table;
     ListNode lnode = l->list_first();
     while (lnode != NULL)
     {
-        table=(json_table_node*)l->list_node_value(lnode);
+        table = (json_table_node *)l->list_node_value(lnode);
         switch (table->type)
         {
         case PAIRS:
