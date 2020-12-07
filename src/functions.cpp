@@ -1,6 +1,6 @@
 #include "functions.h"
 
-void same_prod(List main_l, List to_del_l)
+void similar_items(List main_l, List to_del_l)
 {
     if (main_l == to_del_l)
         return;
@@ -15,6 +15,11 @@ void same_prod(List main_l, List to_del_l)
     } while (tempNode != NULL);
 
     delete to_del_l;
+}
+
+void dissimilar_items(List )
+{
+    
 }
 
 void print_list(List list_to_print)
@@ -199,9 +204,7 @@ void read_csv(string filename, HashTable ht)
             ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
             it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
 
-            // printf("item1: %s  ------------ item2: %s \n", it1->get_item_full_id().c_str(), it2->get_item_full_id().c_str());
-
-            same_prod(it1->get_common_list(), it2->get_common_list());
+            similar_items(it1->get_common_list(), it2->get_common_list());
         }
     }
     free(buffer);

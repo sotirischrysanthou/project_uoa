@@ -20,6 +20,7 @@ int cmp_hashtable_search(Pointer to_find,Pointer value)
     return ((string*)to_find)->compare(*(string*)(((hashtable_node*)value)->key));
 }
 
+// id_to_find: int     ht_node: hashtable_node
 int cmp_hashtable_search_item(Pointer id_to_find, Pointer ht_node)
 {
     return (*(int *)(id_to_find)) - (*(int*)(((HashTable_Node)ht_node)->key));
