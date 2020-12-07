@@ -1,6 +1,6 @@
 #include "functions.h"
 
-void foo(List main_l, List to_del_l)
+void same_prod(List main_l, List to_del_l)
 {
     if (main_l == to_del_l)
         return;
@@ -24,7 +24,6 @@ void print_list(List list_to_print)
     ListNode tempNode = list_to_print->list_first();
     do
     {
-        // printf("%p\n",tempNode);
         tempItem = (item *)list_to_print->list_node_value(tempNode);
         printf("%s->", tempItem->get_item_full_id().c_str());
         tempNode = tempNode->next;
@@ -102,7 +101,7 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
     int counter = 0;
     while (dir_item != NULL) // for every file in dir
     {
-        if (dir_item->d_type == DT_DIR) // skip . and ..
+        if (dir_item->d_type == DT_DIR) // skip "." and ".."
         {
             dir_item = readdir(dir);
             continue;
@@ -115,24 +114,9 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
         ht_item_n->key = new int(it->get_item_id());
         ht_item_n->value = it;
         ht_items->insert(ht_item_n);
-        // if (folder.compare("www.ebay.com") == 0)
-        //     t = clock();
-        //insert item into tree
-        // tree->insert(it, cmp_avl_insert);
-        // if (folder.compare("www.ebay.com") == 0)
-        // {
-        //     counter++;
-        //     t = clock() - t;
-        //     double time_taken = ((double)t) / CLOCKS_PER_SEC;
-        //     if (counter > 5000 && counter < 5500)
-        //         printf("time : %f \n", time_taken);
-        // }
-        //insert item into our database
 
         dir_item = readdir(dir);
     }
-    // if (folder.compare("www.ebay.com") == 0)
-    //     cout << "counter: " << counter << endl;
     htable->insert(ht_n);
     closedir(dir);
 }
@@ -173,10 +157,7 @@ HashTable read_all_folders(string dir_name)
     return ht;
 }
 
-int ht_search_item(Pointer id_to_find, Pointer ht_node)
-{
-    return (*(int *)(id_to_find)) - (*(int*)(((HashTable_Node)ht_node)->key));
-}
+
 
 void read_csv(string filename, HashTable ht)
 {
@@ -214,13 +195,13 @@ void read_csv(string filename, HashTable ht)
         if (similar)
         {
             ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
-            it1 = (item *)ht_items->search(&num1, ht_search_item);
+            it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
             ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
-            it2 = (item *)ht_items->search(&num2, ht_search_item);
+            it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
 
             // printf("item1: %s  ------------ item2: %s \n", it1->get_item_full_id().c_str(), it2->get_item_full_id().c_str());
 
-            foo(it1->get_common_list(), it2->get_common_list());
+            same_prod(it1->get_common_list(), it2->get_common_list());
         }
     }
     free(buffer);
