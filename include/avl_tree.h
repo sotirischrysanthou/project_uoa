@@ -7,6 +7,7 @@
 #include "common_types.h"
 
 using namespace std;
+
 typedef struct avl_node* AvlNode;
 typedef class avl_tree* AvlTree;
 
