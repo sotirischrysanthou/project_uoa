@@ -103,7 +103,6 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
     dir_item = readdir(dir);
     item *it;
     List spec_list=NULL;
-    int counter = 0;
     while (dir_item != NULL) // for every file in dir
     {
         if (dir_item->d_type == DT_DIR) // skip "." and ".."
@@ -114,7 +113,6 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
         name = dir_item->d_name;
         spec_list = parse(main_folder + "/" + folder + "/" + dir_item->d_name);
         it = new item(folder, atoi(name.erase(name.size() - 5).c_str()), spec_list);
-        clock_t t;
         HashTable_Node ht_item_n = new hashtable_node();
         ht_item_n->key = new int(it->get_item_id());
         ht_item_n->value = it;
@@ -166,7 +164,6 @@ HashTable read_all_folders(string dir_name)
 
 void read_csv(string filename, HashTable ht)
 {
-    AvlTree tree;
     HashTable ht_items;
     item *it1, *it2;
     string name1, name2, line;
@@ -180,7 +177,6 @@ void read_csv(string filename, HashTable ht)
         return;
     }
     getline(&buffer, &buffer_size, stream);
-    int c = 0;
     while (getline(&buffer, &buffer_size, stream) != -1)
     {
         line = buffer;

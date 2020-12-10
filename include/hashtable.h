@@ -1,14 +1,13 @@
+#pragma once
 #ifndef HASHTABLE
 #define HASHTABLE
 
-#include "avl_tree.h"
 
-
-using namespace std;
-
+#include <string>
 #include "List.h"
 
 #define  HT_SIZE 100
+
 
 
 

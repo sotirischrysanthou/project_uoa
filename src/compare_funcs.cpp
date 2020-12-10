@@ -1,6 +1,8 @@
 #include "compare_funcs.h"
-#include "../include/hashtable.h"
 #include "item.h"
+#include "../include/hashtable.h"
+
+using namespace std;
 
 // to_find : int*      value : item*
 int cmp_avl_search(Pointer to_find,Pointer value)
@@ -8,7 +10,7 @@ int cmp_avl_search(Pointer to_find,Pointer value)
     return (*(int*)to_find)-((item*)value)->get_item_id();
 }
 
-// to_insert:item*     value : itme*
+// to_insert:item*     value : item*
 int cmp_avl_insert(Pointer to_insert,Pointer value)
 {
     return ((item*)to_insert)->get_item_id()-((item*)value)->get_item_id();

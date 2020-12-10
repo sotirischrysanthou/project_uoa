@@ -1,10 +1,10 @@
 #pragma once
+#ifndef _COMMON_TYPES_
+#define _COMMON_TYPES_
 
 
-#include <string>
 
 
-using namespace std;
 
 
 
@@ -23,10 +23,4 @@ typedef void (*DestroyFunc)(Pointer value);
 
 typedef void (*GeneralFunc)(Pointer value);
 
-
-
-
-
-
-
-
+#endif

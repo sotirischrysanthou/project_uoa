@@ -1,10 +1,13 @@
 #pragma once 
+#ifndef _LIST_
+#define _LIST_
 
 #include "common_types.h"
 
 #define LIST_BOF (ListNode)0
 #define LIST_EOF (ListNode)0
 
+using namespace std;
 
 typedef class list* List;
 typedef struct list_node* ListNode;
@@ -65,4 +68,4 @@ public:
     ListNode list_find_node(Pointer value, CompareFunc compare);
 };
 
-
+#endif

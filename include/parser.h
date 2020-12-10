@@ -1,8 +1,10 @@
 #ifndef PARSER
 #define PARSER
 
+#include <string>
 #include "common_types.h"
 #include "List.h"
+
 
 #define PAIRS 'p'
 #define TABLE 't'

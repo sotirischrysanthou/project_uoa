@@ -1,20 +1,9 @@
 #ifndef ITEM
 #define ITEM
-
 #include "List.h"
+#include <string>
 using namespace std;
 
-// int itemHashFunc(Pointer item,int TABLE_SIZE)
-// {
-
-// }
-
-// struct spec
-// {
-//     string s_name;
-//     char info_type;
-//     string s_info;
-// };
 
 class item
 {
