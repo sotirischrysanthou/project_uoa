@@ -10,7 +10,7 @@
 #include "compare_funcs.h"
 
 /* Create a connection between 2 items, using their similar lists */
-void similar_items(List main_l, List to_del_l);
+void similar_items(item A,item B);
 /* print a list of every item in a similar list */
 void print_list(List list_to_print);
 /* print all items common with the given list_to_visit (basically prints a clique) */

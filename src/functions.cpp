@@ -1,7 +1,18 @@
 #include "functions.h"
 
-void similar_items(List main_l, List to_del_l)
+void similar_items(item *A, item *B)
 {
+    List Acommon_l=A->get_common_and_uncommon().common;
+    List Bcommon_l=B->get_common_and_uncommon().common;
+    List Auncommon_l=A->get_common_and_uncommon().common;
+    List Buncommon_l=B->get_common_and_uncommon().common;
+    List main_l = Acommon_l;
+    List to_del_l = Bcommon_l;
+    if (Acommon_l->list_size() < Bcommon_l->list_size())
+    {
+        main_l = Bcommon_l;
+        to_del_l = Acommon_l;
+    }
     if (main_l == to_del_l)
         return;
     item *tempItem;
@@ -17,9 +28,8 @@ void similar_items(List main_l, List to_del_l)
     delete to_del_l;
 }
 
-void dissimilar_items(List )
+void dissimilar_items(List)
 {
-    
 }
 
 void print_list(List list_to_print)
@@ -76,7 +86,7 @@ void destroy_item(Pointer value)
 
 void del_item_ht(Pointer value)
 {
-    delete (int*)((HashTable_Node)value)->key;
+    delete (int *)((HashTable_Node)value)->key;
     delete (item *)((HashTable_Node)value)->value;
     delete (HashTable_Node)value;
 }
@@ -102,7 +112,7 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
     dir = opendir((main_folder + "/" + folder).c_str());
     dir_item = readdir(dir);
     item *it;
-    List spec_list=NULL;
+    List spec_list = NULL;
     while (dir_item != NULL) // for every file in dir
     {
         if (dir_item->d_type == DT_DIR) // skip "." and ".."
@@ -111,7 +121,12 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
             continue;
         }
         name = dir_item->d_name;
-        spec_list = parse(main_folder + "/" + folder + "/" + dir_item->d_name);
+        // clock_t start = clock();
+        spec_list = parse(main_folder + "/" + folder + "/" + name);
+        // clock_t end = clock();
+        // double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+        // if (time_spent > 0.0008)
+        // printf("Time elpased is %f seconds ----%s//%s \n", time_spent, folder.c_str(), name.c_str());
         it = new item(folder, atoi(name.erase(name.size() - 5).c_str()), spec_list);
         HashTable_Node ht_item_n = new hashtable_node();
         ht_item_n->key = new int(it->get_item_id());
@@ -160,8 +175,6 @@ HashTable read_all_folders(string dir_name)
     return ht;
 }
 
-
-
 void read_csv(string filename, HashTable ht)
 {
     HashTable ht_items;
@@ -200,7 +213,7 @@ void read_csv(string filename, HashTable ht)
             ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
             it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
 
-            similar_items(it1->get_common_list(), it2->get_common_list());
+            similar_items(it1, it2);
         }
     }
     free(buffer);
