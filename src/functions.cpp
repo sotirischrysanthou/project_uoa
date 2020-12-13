@@ -2,19 +2,21 @@
 
 void similar_items(item *A, item *B)
 {
-    List Acommon_l=A->get_common_and_uncommon().common;
-    List Bcommon_l=B->get_common_and_uncommon().common;
-    List Auncommon_l=A->get_common_and_uncommon().common;
-    List Buncommon_l=B->get_common_and_uncommon().common;
+    List Acommon_l = A->get_common_and_uncommon().common;
+    List Bcommon_l = B->get_common_and_uncommon().common;
+    HashTable Auncommon_ht = A->get_common_and_uncommon().uncommon;
+    HashTable Buncommon_ht = B->get_common_and_uncommon().uncommon;
     List main_l = Acommon_l;
     List to_del_l = Bcommon_l;
+    HashTable main_ht = Auncommon_ht;
+    HashTable to_del_ht = Buncommon_ht;
+    if (main_l == to_del_l)
+        return;
     if (Acommon_l->list_size() < Bcommon_l->list_size())
     {
         main_l = Bcommon_l;
         to_del_l = Acommon_l;
     }
-    if (main_l == to_del_l)
-        return;
     item *tempItem;
     ListNode tempNode = to_del_l->list_first();
     do
@@ -26,10 +28,55 @@ void similar_items(item *A, item *B)
     } while (tempNode != NULL);
 
     delete to_del_l;
+
+    HashTable_Node ht_n;
+
+    main_l=Acommon_l;
+    if (Auncommon_ht->ht_size() < Buncommon_ht->ht_size())
+    {
+        main_ht = Buncommon_ht;
+        main_l=Bcommon_l;
+        to_del_ht = Auncommon_ht;
+    }
+    
+    to_del_l=to_del_ht->return_list();
+    tempNode = to_del_l->list_first();
+    while(tempNode != NULL)
+    {
+        if(main_ht->search(tempNode->value, cmp_hashtable_search_address))
+        {
+            // List to_visit_l=(List)(tempNode->value);
+            // ListNode node=to_visit_l->list_first();
+            // item * tempItem=(item *)node->value;
+            // HashTable tempHt = tempItem->get_common_and_uncommon().uncommon;
+            // tempHt->remove(main_l);
+        }
+        else
+        {
+            ht_n = new hashtable_node;
+            ht_n->key = tempNode->value;
+            ht_n->value = tempNode->value;
+            main_ht->insert(ht_n);
+        }
+        
+        tempNode = to_del_l->list_next(tempNode);
+    }
+    
 }
 
-void dissimilar_items(List)
+void dissimilar_items(item *a,item *b)
 {
+    HashTable_Node ht_n;
+
+    ht_n=new hashtable_node;
+    ht_n->key=b->get_common_and_uncommon().common;
+    ht_n->value=b->get_common_and_uncommon().common;
+    a->get_common_and_uncommon().uncommon->insert(ht_n);
+
+    ht_n=new hashtable_node;
+    ht_n->key=a->get_common_and_uncommon().common;
+    ht_n->value=a->get_common_and_uncommon().common;
+    b->get_common_and_uncommon().uncommon->insert(ht_n);
 }
 
 void print_list(List list_to_print)
@@ -54,11 +101,14 @@ int list_cmp(Pointer l1, Pointer l2)
         return 1;
 }
 
-void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
+void print_commons(HashTable visited_lists, List list_to_visit, FILE *output_file)
 {
-    if (visited_lists->list_find(list_to_visit, list_cmp))
+    string *str = new string(((item *)(list_to_visit->list_first()->value))->get_item_full_id());
+    if (visited_lists->search(str, cmp_hashtable_search))
+    {
+        delete str;
         return;
-
+    }
     ListNode nodeOne = list_to_visit->list_first();
     item *itemOne = (item *)list_to_visit->list_node_value(nodeOne);
     ListNode nodeTwo = nodeOne;
@@ -76,7 +126,11 @@ void print_commons(List visited_lists, List list_to_visit, FILE *output_file)
             itemTwo = itemOne;
         }
     }
-    visited_lists->list_insert_next(visited_lists->list_last(), list_to_visit);
+    HashTable_Node ht_n = new hashtable_node;
+    ht_n->key = str;
+    ht_n->value = list_to_visit;
+
+    visited_lists->insert(ht_n);
 }
 
 void destroy_item(Pointer value)
@@ -121,8 +175,8 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
             continue;
         }
         name = dir_item->d_name;
-        // clock_t start = clock();
         spec_list = parse(main_folder + "/" + folder + "/" + name);
+        // clock_t start = clock();
         // clock_t end = clock();
         // double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
         // if (time_spent > 0.0008)
@@ -206,21 +260,26 @@ void read_csv(string filename, HashTable ht)
 
         // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
 
+        ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
+        it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
+        ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
+        it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
         if (similar)
         {
-            ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
-            it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
-            ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
-            it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
 
             similar_items(it1, it2);
         }
+        else
+        {
+            dissimilar_items(it1,it2);
+        }
+        
     }
     free(buffer);
     fclose(stream);
 }
 
-List visited_lists;
+HashTable visited_lists;
 FILE *output;
 
 void destroy_list(Pointer value)
@@ -234,9 +293,16 @@ void print_all_commons(Pointer value)
     print_commons(visited_lists, ((item *)value)->get_common_list(), output);
 }
 
+void del_visited_lists_ht(Pointer value)
+{
+    delete (string *)((HashTable_Node)value)->key;
+    delete (List)((HashTable_Node)value)->value;
+    delete (HashTable_Node)value;
+}
+
 void print_all(HashTable ht, FILE *output_file)
 {
-    visited_lists = new list(destroy_list);
+    visited_lists = new hashtable(del_visited_lists_ht, hashfunction);
     output = output_file;
     List hts = ht->return_list();
     ListNode tempNode = hts->list_first();

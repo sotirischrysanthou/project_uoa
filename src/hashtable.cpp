@@ -16,6 +16,7 @@ hashtable::hashtable(DestroyFunc destroy_value, hashFunc hashfunction)
     {
         table[i] = new list(destroy_value);
     }
+    size=0;
 }
 
 hashtable::~hashtable()
@@ -30,18 +31,20 @@ Pointer hashtable::search(Pointer key, CompareFunc compare)
 {
     List chain = table[hashfunction(key)];
     HashTable_Node temp = (HashTable_Node)(chain->list_find(key, compare));
-    return temp->value;
+
+    return temp == NULL ? NULL : temp->value;
 }
 
 void hashtable::insert(hashtable_node *value)
 {
     List chain = table[hashfunction(value->key)];
     chain->list_insert_next(chain->list_last(), (Pointer)value);
+    size++;
 }
 
 List hashtable::return_list()
 {
-    List l = new list(NULL); 
+    List l = new list(NULL);
     HashTable_Node temp;
     for (int i = 0; i < HT_SIZE; i++)
     {
@@ -54,4 +57,30 @@ List hashtable::return_list()
         }
     }
     return l;
+}
+
+int cmp(Pointer a,Pointer b)
+{
+    return ((ListNode)b)->next->value==a;
+}
+
+void hashtable::remove(Pointer key)
+{
+    List chain = table[hashfunction(key)];
+    ListNode tempNode=chain->list_first();
+    if(tempNode->value==key)
+        chain->list_remove_next(NULL);
+    else
+    {
+        while (tempNode->next!=NULL&&((HashTable_Node)(tempNode->next->value))->key!=key)
+            tempNode=tempNode->next;
+        if(tempNode->next!=NULL)
+            chain->list_remove_next(tempNode);
+    }
+    
+}
+
+int hashtable::ht_size()
+{
+    return size;
 }

@@ -1,10 +1,15 @@
 #include "item.h"
 
+int hashfunction_address(Pointer value)
+{
+    return (long int)value % HT_SIZE;
+}
+
 item::item(string fldr, int i, List spec_list) : folder(fldr), id(i), specs(spec_list)
 {
 
     common_and_uncommon.common = new list(NULL);
-    common_and_uncommon.uncommon = new list(NULL);
+    common_and_uncommon.uncommon = new hashtable(NULL,hashfunction_address);
     common_and_uncommon.common->list_insert_next(LIST_BOF, this);
 
     // printf("Debug!!%s//%d   %d  \n",folder.c_str(),id,common_list->list_size());
@@ -12,16 +17,16 @@ item::item(string fldr, int i, List spec_list) : folder(fldr), id(i), specs(spec
 
 item::~item()
 {
-    //delete common_list;
     if (specs != NULL)
         delete specs;
+    // delete common_and_uncommon.uncommon;
 }
 
 List item::get_common_list()
 {
     return common_and_uncommon.common;
 }
-List item::get_uncommon_list()
+HashTable item::get_uncommon_list()
 {
     return common_and_uncommon.uncommon;
 }

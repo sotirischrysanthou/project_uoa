@@ -27,3 +27,9 @@ int cmp_hashtable_search_item(Pointer id_to_find, Pointer ht_node)
 {
     return (*(int *)(id_to_find)) - (*(int*)(((HashTable_Node)ht_node)->key));
 }
+
+// a: mem_address      b: hash_table_node
+int cmp_hashtable_search_address(Pointer a,Pointer b)
+{
+    return (long int)a-(long int)(((HashTable_Node)b)->value);
+}

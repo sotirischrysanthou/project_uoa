@@ -26,13 +26,16 @@ class hashtable
 {
     List table[HT_SIZE];
     DestroyFunc destroy_value; // function that distroys an element value
-    hashFunc hashfunction; 
+    hashFunc hashfunction;
+    int size;
 public:
     hashtable(DestroyFunc destroy_value,hashFunc hashfunction);
     ~hashtable();
     Pointer search(Pointer value,CompareFunc compare);
     void insert(hashtable_node* value);
     List return_list();
+    void remove(Pointer value);
+    int ht_size();
 };
 
 #endif
