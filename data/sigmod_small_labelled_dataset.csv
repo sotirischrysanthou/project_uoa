@@ -1,0 +1,12 @@
+left_spec_id,right_spec_id,label
+buy.net//4233,buy.net//4236,0
+buy.net//4233,buy.net//4239,0
+buy.net//4239,buy.net//4236,1
+buy.net//4247,buy.net//4255,1
+buy.net//4247,buy.net//4258,1
+buy.net//4258,buy.net//4261,0
+buy.net//4261,buy.net//4247,0
+buy.net//4261,buy.net//4266,0
+buy.net//4258,buy.net//4266,1
+buy.net//4236,buy.net//4272,0
+buy.net//4266,buy.net//4272,1

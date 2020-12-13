@@ -22,15 +22,6 @@ item::~item()
     // delete common_and_uncommon.uncommon;
 }
 
-List item::get_common_list()
-{
-    return common_and_uncommon.common;
-}
-HashTable item::get_uncommon_list()
-{
-    return common_and_uncommon.uncommon;
-}
-
 connections item::get_common_and_uncommon()
 {
     return common_and_uncommon;
@@ -54,4 +45,9 @@ string item::get_item_full_id()
 void item::change_common_list(List new_list)
 {
     common_and_uncommon.common = new_list;
+}
+
+void item::change_uncommon_ht(HashTable ht)
+{
+    common_and_uncommon.uncommon = ht;
 }

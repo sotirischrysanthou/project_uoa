@@ -1,67 +1,126 @@
 #include "functions.h"
+#include <assert.h>
+
+
+// void similar_items(item *A, item *B)
+// {
+//     List Acommon_l = A->get_common_and_uncommon().common;
+//     List Bcommon_l = B->get_common_and_uncommon().common;
+//     HashTable Auncommon_ht = A->get_common_and_uncommon().uncommon;
+//     HashTable Buncommon_ht = B->get_common_and_uncommon().uncommon;
+//     List main_l = Acommon_l;
+//     List to_del_l = Bcommon_l;
+//     HashTable main_ht = Auncommon_ht;
+//     HashTable to_del_ht = Buncommon_ht;
+//     item *temp;
+//     if (main_l == to_del_l)
+//         return;
+//     if (Acommon_l->list_size() < Bcommon_l->list_size())
+//     {
+//         temp=A;
+//         A=B;
+//         B=temp;
+//         main_l = Bcommon_l;
+//         to_del_l = Acommon_l;
+//         main_ht = Buncommon_ht;
+//         to_del_ht = Auncommon_ht;
+//     }
+//     item *tempItem;
+//     ListNode tempNode = to_del_l->list_first();
+//     HashTable_Node ht_n;
+
+//     List to_del_ht_l=to_del_ht->return_list();
+//     tempNode = to_del_ht_l->list_first();
+//     while(tempNode != NULL)
+//     {
+//         if(main_ht->search(tempNode->value, cmp_hashtable_search_address))
+//         {
+//             List to_visit_l=(List)(tempNode->value);
+//             ListNode node=to_visit_l->list_first();
+//             item * tempItem=(item *)node->value;
+//             HashTable tempHt = tempItem->get_common_and_uncommon().uncommon;
+//             printf("-=-=-=-\n");
+//             assert(tempHt!=NULL);
+//             if(tempHt->search(to_del_l,cmp_hashtable_search_address))
+//                 tempHt->remove(to_del_l);
+//         }
+//         else
+//         {
+//             ht_n = new hashtable_node;
+//             ht_n->key = tempNode->value;
+//             ht_n->value = tempNode->value;
+//             main_ht->insert(ht_n);
+//         }
+//         B->change_uncommon_ht(A->get_common_and_uncommon().uncommon);
+//         tempNode = to_del_ht_l->list_next(tempNode);
+//     }
+
+//     tempNode=to_del_l->list_first();
+//     do
+//     {
+//         tempItem = (item *)to_del_l->list_node_value(tempNode);
+//         tempItem->change_common_list(main_l);
+//         main_l->list_insert_next(main_l->list_last(), tempItem);
+//         tempNode = to_del_l->list_next(tempNode);
+//     } while (tempNode != NULL);
+
+//     delete to_del_l;
+
+    
+// }
+
 
 void similar_items(item *A, item *B)
 {
-    List Acommon_l = A->get_common_and_uncommon().common;
-    List Bcommon_l = B->get_common_and_uncommon().common;
-    HashTable Auncommon_ht = A->get_common_and_uncommon().uncommon;
-    HashTable Buncommon_ht = B->get_common_and_uncommon().uncommon;
-    List main_l = Acommon_l;
-    List to_del_l = Bcommon_l;
-    HashTable main_ht = Auncommon_ht;
-    HashTable to_del_ht = Buncommon_ht;
-    if (main_l == to_del_l)
+    if (A->get_common_and_uncommon().common==B->get_common_and_uncommon().common)
         return;
-    if (Acommon_l->list_size() < Bcommon_l->list_size())
+    if (A->get_common_and_uncommon().uncommon->ht_size()<B->get_common_and_uncommon().uncommon->ht_size())
     {
-        main_l = Bcommon_l;
-        to_del_l = Acommon_l;
+        item * tmp = A;
+        A=B;
+        B=tmp;
     }
-    item *tempItem;
-    ListNode tempNode = to_del_l->list_first();
-    do
+    List common_a = A->get_common_and_uncommon().common;
+    List common_b = B->get_common_and_uncommon().common;
+    HashTable uncommon_a = A->get_common_and_uncommon().uncommon;
+    HashTable uncommon_b = B->get_common_and_uncommon().uncommon;
+
+    ListNode tempNode = common_b->list_first();
+    while(tempNode!=NULL)
     {
-        tempItem = (item *)to_del_l->list_node_value(tempNode);
-        tempItem->change_common_list(main_l);
-        main_l->list_insert_next(main_l->list_last(), tempItem);
-        tempNode = to_del_l->list_next(tempNode);
-    } while (tempNode != NULL);
-
-    delete to_del_l;
-
-    HashTable_Node ht_n;
-
-    main_l=Acommon_l;
-    if (Auncommon_ht->ht_size() < Buncommon_ht->ht_size())
-    {
-        main_ht = Buncommon_ht;
-        main_l=Bcommon_l;
-        to_del_ht = Auncommon_ht;
+        item* tempItem = (item *)common_b->list_node_value(tempNode);
+        tempItem->change_common_list(common_a);
+        common_a->list_insert_next(common_a->list_last(), tempItem);
+        tempNode = common_b->list_next(tempNode);
     }
     
-    to_del_l=to_del_ht->return_list();
-    tempNode = to_del_l->list_first();
-    while(tempNode != NULL)
+
+    tempNode = uncommon_b->return_list()->list_first();
+    while(tempNode!=NULL)
     {
-        if(main_ht->search(tempNode->value, cmp_hashtable_search_address))
+        if(uncommon_a->search(tempNode->value, cmp_hashtable_search_address))
         {
-            // List to_visit_l=(List)(tempNode->value);
-            // ListNode node=to_visit_l->list_first();
-            // item * tempItem=(item *)node->value;
-            // HashTable tempHt = tempItem->get_common_and_uncommon().uncommon;
-            // tempHt->remove(main_l);
+            // ((item*)((((List)(tempNode->value))->list_first())->value))->get_common_and_uncommon().uncommon->remove(common_b);
+            List t_L = (List)(tempNode->value);
+            ListNode t_LN = t_L->list_first();
+            item* t_i = (item*)t_LN->value;
+            HashTable t_ht = t_i->get_common_and_uncommon().uncommon;
+            assert(t_ht!=NULL);
+            // printf("removing...\n");
+            t_ht->remove(common_b);
         }
         else
         {
-            ht_n = new hashtable_node;
-            ht_n->key = tempNode->value;
-            ht_n->value = tempNode->value;
-            main_ht->insert(ht_n);
+            HashTable_Node ht_n = new hashtable_node;
+            ht_n->key=tempNode->value;
+            ht_n->value=tempNode->value;
+            uncommon_a->insert(ht_n);
         }
         
-        tempNode = to_del_l->list_next(tempNode);
+        tempNode = tempNode->next;
     }
-    
+    B->change_uncommon_ht(uncommon_a);
+
 }
 
 void dissimilar_items(item *a,item *b)
@@ -290,7 +349,7 @@ void destroy_list(Pointer value)
 void print_all_commons(Pointer value)
 {
     // printf("%s\n",((item*)value)->get_item_full_id().c_str());
-    print_commons(visited_lists, ((item *)value)->get_common_list(), output);
+    print_commons(visited_lists, ((item *)value)->get_common_and_uncommon().common, output);
 }
 
 void del_visited_lists_ht(Pointer value)

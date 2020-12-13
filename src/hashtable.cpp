@@ -16,7 +16,7 @@ hashtable::hashtable(DestroyFunc destroy_value, hashFunc hashfunction)
     {
         table[i] = new list(destroy_value);
     }
-    size=0;
+    size = 0;
 }
 
 hashtable::~hashtable()
@@ -59,25 +59,35 @@ List hashtable::return_list()
     return l;
 }
 
-int cmp(Pointer a,Pointer b)
+int cmp(Pointer a, Pointer b)
 {
-    return ((ListNode)b)->next->value==a;
+    return ((ListNode)b)->next->value == a;
 }
 
 void hashtable::remove(Pointer key)
 {
     List chain = table[hashfunction(key)];
-    ListNode tempNode=chain->list_first();
-    if(tempNode->value==key)
+    if(chain->list_size()==0)
+    {
+        printf("nooooooooooot\n");
+        return;
+    }
+    ListNode tempNode = chain->list_first();
+    if (tempNode->value == key)
+    {
         chain->list_remove_next(NULL);
+        size--;
+    }
     else
     {
-        while (tempNode->next!=NULL&&((HashTable_Node)(tempNode->next->value))->key!=key)
-            tempNode=tempNode->next;
-        if(tempNode->next!=NULL)
+        while (tempNode->next != NULL && ((HashTable_Node)(tempNode->next->value))->key != key)
+            tempNode = tempNode->next;
+        if (tempNode->next != NULL)
+        {
             chain->list_remove_next(tempNode);
+            size--;
+        }
     }
-    
 }
 
 int hashtable::ht_size()

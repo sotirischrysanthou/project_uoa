@@ -23,14 +23,14 @@ public:
     item(string fldr, int i, List spec_list);
     ~item();
     /* Returns a list of items */
-    List get_common_list();
+
     /* Reterns a list of lists that contain items(list of common lists of uncommon items) */
-    HashTable get_uncommon_list();
     connections get_common_and_uncommon();
     int get_item_id();
     string get_item_folder();
     string get_item_full_id();
     void change_common_list(List new_list);
+    void change_uncommon_ht(HashTable ht);
 
 };
 
