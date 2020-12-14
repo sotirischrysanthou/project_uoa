@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
     printf("Read all json files\n");
 
     gettimeofday(&t1, NULL);
-    read_csv("./data/sigmod_large_labelled_dataset.csv",HT);
+    read_csv("./data/sigmod_medium_labelled_dataset.csv",HT);
     gettimeofday(&t2, NULL);
     // compute and print the elapsed time in millisec
     elapsedTime = (t2.tv_sec - t1.tv_sec);      // sec to ms
