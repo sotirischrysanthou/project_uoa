@@ -85,14 +85,8 @@ void similar_items(item *A, item *B)
     HashTable uncommon_a = A->get_common_and_uncommon().uncommon;
     HashTable uncommon_b = B->get_common_and_uncommon().uncommon;
 
-    ListNode tempNode = common_b->list_first();
-    while(tempNode!=NULL)
-    {
-        item* tempItem = (item *)common_b->list_node_value(tempNode);
-        tempItem->change_common_list(common_a);
-        common_a->list_insert_next(common_a->list_last(), tempItem);
-        tempNode = common_b->list_next(tempNode);
-    }
+    ListNode tempNode;
+    
     
 
     tempNode = uncommon_b->return_list()->list_first();
@@ -115,11 +109,30 @@ void similar_items(item *A, item *B)
             ht_n->key=tempNode->value;
             ht_n->value=tempNode->value;
             uncommon_a->insert(ht_n);
+
+            List t_L = (List)(tempNode->value);
+            ListNode t_LN = t_L->list_first();
+            item *t_i = (item *)t_LN->value;
+            HashTable t_ht = t_i->get_common_and_uncommon().uncommon;
+            assert(t_ht != NULL);
+            t_ht->remove(common_b);
+            ht_n = new hashtable_node;
+            ht_n->key = common_a;
+            ht_n->value = common_a;
+            t_ht->insert(ht_n);
         }
         
         tempNode = tempNode->next;
     }
-    B->change_uncommon_ht(uncommon_a);
+    tempNode = common_b->list_first();
+    while(tempNode!=NULL)
+    {
+        item* tempItem = (item *)common_b->list_node_value(tempNode);
+        tempItem->change_common_list(common_a);
+        tempItem->change_uncommon_ht(uncommon_a);
+        common_a->list_insert_next(common_a->list_last(), tempItem);
+        tempNode = common_b->list_next(tempNode);
+    }
 
 }
 
@@ -216,7 +229,6 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
 
     string name;
 
-    // avl_tree *tree = new avl_tree(destroy_item);
     HashTable ht_items = new hashtable(del_item_ht, hashfunction_int);
     HashTable_Node ht_n = new hashtable_node();
     ht_n->key = new string(folder);
@@ -235,11 +247,6 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
         }
         name = dir_item->d_name;
         spec_list = parse(main_folder + "/" + folder + "/" + name);
-        // clock_t start = clock();
-        // clock_t end = clock();
-        // double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-        // if (time_spent > 0.0008)
-        // printf("Time elpased is %f seconds ----%s//%s \n", time_spent, folder.c_str(), name.c_str());
         it = new item(folder, atoi(name.erase(name.size() - 5).c_str()), spec_list);
         HashTable_Node ht_item_n = new hashtable_node();
         ht_item_n->key = new int(it->get_item_id());
