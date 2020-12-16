@@ -247,9 +247,9 @@ void read_files(string main_folder, string folder, HashTable htable, HashTable i
         }
         name = dir_item->d_name;
         it = new item(folder, atoi(name.substr(0,name.size() - 5).c_str()));
-        printf("parsing...\n");
+        // printf("parsing...\n");
         spec_list = parse(main_folder + "/" + folder + "/" + name, it->get_words_ht(), idf_htable);
-        printf("finished parsing...\n");
+        // printf("finished parsing...\n");
         it->set_spec_list(spec_list);
         HashTable_Node ht_item_n = new hashtable_node();
         ht_item_n->key = new int(it->get_item_id());
