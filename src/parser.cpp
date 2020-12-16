@@ -162,6 +162,11 @@ void tf_ifd_hts_insert(int begin, int end)
         else if (file_con[i] == ' ' || file_con[i] == '\"')
         {
             end_of_word = i;
+            if(end_of_word-begin_of_word<3)
+            {
+                begin_of_word=i+1;
+                continue;
+            }
             word = new string(file_con.substr(begin_of_word, end_of_word - begin_of_word));
             counter = (int *)tf_ht->search(word, cmp_hashtable_search);
             if (counter)
@@ -203,6 +208,8 @@ string get_string(bool flag)
 
     end = ch;
     ch++;
+
+
     if(flag&&tf_ht&&idf_ht)
         tf_ifd_hts_insert(begin, end);
     
