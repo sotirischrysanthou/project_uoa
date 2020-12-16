@@ -16,8 +16,10 @@ void print_list(List list_to_print);
 /* print all items common with the given list_to_visit (basically prints a clique) */
 void print_commons(HashTable visited_lists, List list_to_visit, FILE *output_file);
 /* read all folders and files and input all items and specs into a hashtable */
-HashTable read_all_folders(string dir_name);
+int read_all_folders(string dir_name, HashTable ht, HashTable tf_idf);
 /* read a csv and create all similar connections between the items */
 void read_csv(string filename, HashTable ht);
 /* print all similar pairs (project1 output) */
 void print_all(HashTable ht,FILE *output_file=stdout);
+/* set the values for BoW (0) or Tf-Idf (1) */
+void set_Bow_or_TfIdf(HashTable ht, HashTable tfidf, int Item_count, bool flag);

@@ -6,7 +6,7 @@
 #include <string>
 #include "List.h"
 
-#define  HT_SIZE 1000
+#define  HT_SIZE 500
 
 
 

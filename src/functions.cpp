@@ -1,6 +1,7 @@
 #include "functions.h"
 #include <assert.h>
-#include <sys/time.h>                
+#include <sys/time.h>
+#include <math.h>
 
 
 // void similar_items(item *A, item *B)
@@ -223,7 +224,7 @@ int hashfunction_int(Pointer key)
     return (*(int *)key) % HT_SIZE;
 }
 
-void read_files(string main_folder, string folder, HashTable htable, HashTable idf_htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+int read_files(string main_folder, string folder, HashTable htable, HashTable idf_htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
@@ -261,6 +262,7 @@ void read_files(string main_folder, string folder, HashTable htable, HashTable i
     }
     htable->insert(ht_n);
     closedir(dir);
+    return ht_items->ht_size();
 }
 
 
@@ -271,10 +273,11 @@ void del_main_ht(Pointer value)
     delete (HashTable_Node)value;
 }
 
-HashTable read_all_folders(string dir_name)
+int read_all_folders(string dir_name, HashTable ht, HashTable idf_ht)
 {
-    HashTable ht = new hashtable(del_main_ht, hashfunction);
-    HashTable idf_ht = new hashtable(NULL, hashfunction);
+    int count = 0;
+    ht = new hashtable(del_main_ht, hashfunction);
+    idf_ht = new hashtable(NULL, hashfunction);
     struct dirent *de;
     DIR *dr = opendir(dir_name.c_str());
     if (!dr)
@@ -290,7 +293,7 @@ HashTable read_all_folders(string dir_name)
 
         if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
-        read_files(dir_name, de->d_name, ht, idf_ht);
+        count += read_files(dir_name, de->d_name, ht, idf_ht);
 
     gettimeofday(&t2, NULL);
     elapsedTime = (t2.tv_sec - t1.tv_sec);      // sec to ms
@@ -299,7 +302,7 @@ HashTable read_all_folders(string dir_name)
     }
     
     closedir(dr);
-    return ht;
+    return count;
 }
 
 void read_csv(string filename, HashTable ht)
@@ -393,4 +396,59 @@ void print_all(HashTable ht, FILE *output_file)
     }
     delete hts;
     delete visited_lists;
+}
+
+void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
+{
+    List ht_l = ht->return_list();
+    List idf_l = idf->return_list();
+    ListNode ht_l_node=ht_l->list_first();
+    while (ht_l_node!=NULL)
+    {
+        List ht_ll = ((HashTable)(ht_l_node->value))->return_list();
+        ListNode ht_ll_node = ht_ll->list_first();
+        while(ht_ll_node!=NULL)
+        {
+            item* it = (item*)(ht_ll_node->value);
+            if(!flag)
+            {
+                int *bow = new int[idf->ht_size()];
+                it->set_tables(bow, NULL);
+                ListNode l_node=idf_l->list_first();
+                int i=0;
+                while(l_node!=NULL)
+                {
+                    int * tmp = (int *)it->get_words_ht()->search((string*)(l_node->value), cmp_hashtable_search);
+                    if(tmp!=NULL)
+                        bow[i]=*tmp;
+                    else
+                        bow[i]=0;
+                    
+                    l_node=l_node->next;
+                }
+            }
+            else
+            {
+                float *tfidf = new float[idf->ht_size()];
+                it->set_tables(NULL, tfidf);
+                ListNode l_node=idf_l->list_first();
+                int i=0;
+                while(l_node!=NULL)
+                {
+                    int * tmp = (int *)it->get_words_ht()->search((string*)(l_node->value), cmp_hashtable_search);
+                    if(tmp!=NULL)
+                    {
+                        tfidf[i]=((*tmp)/it->get_words_ht()->ht_size()) * log((item_count*1.0)/(*(int*)(l_node->value)));
+                    }
+                    else
+                        tfidf[i]=0;
+                    l_node=l_node->next;
+                }
+            }
+            
+            ht_ll_node=ht_ll_node->next;
+        }
+        ht_l_node=ht_l_node->next;
+    }
+    
 }

@@ -24,7 +24,8 @@ int lines_counter(const char *filename)
 void test_medium(void)
 {
     HashTable HT = NULL;
-    HT = read_all_folders("./data/2013_camera_specs");
+    HashTable IDF = NULL;
+    int c = read_all_folders("./data/2013_camera_specs", HT, IDF);
     if (!TEST_CHECK(HT != NULL))
         TEST_MSG("reading folders failed");
     read_csv("./data/sigmod_medium_labelled_dataset.csv", HT);
@@ -39,7 +40,8 @@ void test_medium(void)
 void test_large(void)
 {
     HashTable HT = NULL;
-    HT = read_all_folders("./data/2013_camera_specs");
+    HashTable IDF = NULL;
+    int c = read_all_folders("./data/2013_camera_specs", HT, IDF);
     if (TEST_CHECK(HT != NULL))
         TEST_MSG("reading folders failed");
     read_csv("./data/sigmod_large_labelled_dataset.csv", HT);
