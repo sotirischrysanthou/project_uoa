@@ -1,5 +1,6 @@
 #include "functions.h"
 #include <assert.h>
+#include <sys/time.h>                
 
 
 // void similar_items(item *A, item *B)
@@ -283,10 +284,20 @@ HashTable read_all_folders(string dir_name)
     }
     while ((de = readdir(dr)) != NULL)
     {
+    struct timeval t1, t2;
+    double elapsedTime;
+    gettimeofday(&t1, NULL);
+
         if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
         read_files(dir_name, de->d_name, ht, idf_ht);
+
+    gettimeofday(&t2, NULL);
+    elapsedTime = (t2.tv_sec - t1.tv_sec);      // sec to ms
+    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0;   // us to ms
+    printf("%f s. for %s\n", elapsedTime,de->d_name);
     }
+    
     closedir(dr);
     return ht;
 }
