@@ -183,7 +183,7 @@ void tf_ifd_hts_insert(int begin, int end)
     }
 }
 
-string get_string()
+string get_string(bool flag)
 {
     int begin = ch, end;
 
@@ -195,7 +195,7 @@ string get_string()
 
     end = ch;
     ch++;
-    if(tf_ht&&idf_ht)
+    if(flag&&tf_ht&&idf_ht)
         tf_ifd_hts_insert(begin, end);
     
 
@@ -209,7 +209,7 @@ j_pair *json_pair()
     ch++;
     new_pair = new j_pair;
     new_pair->type = PAIRS;
-    new_pair->title = new string(get_string());
+    new_pair->title = new string(get_string(0));
     if (new_pair->title->compare("ERROR_PARSING_STRING") == 0)
     {
         delete new_pair;
@@ -253,7 +253,7 @@ j_pair *json_pair()
     {
         new_pair->type = STRING;
         ch++;
-        new_pair->value = new string(get_string());
+        new_pair->value = new string(get_string(1));
         if ((*(string *)(new_pair->value)).compare("ERROR_PARSING_STRING") == 0)
         {
             delete (string *)(new_pair->value);
@@ -343,7 +343,7 @@ json_table_node *json_table()
     {
         new_node->type = STRING;
         ch++;
-        new_node->value = new string(get_string());
+        new_node->value = new string(get_string(1));
         if ((*(string *)new_node->value).compare("ERROR_PARSING_STRING") == 0)
         {
             delete (string *)(new_node->value);

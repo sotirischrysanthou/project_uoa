@@ -29,7 +29,7 @@ struct json_table_node
 /* parse ints, floats */
 json_table_node *get_number();
 /* parse strings */
-string get_string();
+string get_string(bool flag);
 /* parse pairs ex. { "A" : a, "B" : b } */
 j_pair *json_pair();
 List create_jList_of_pairs();
