@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 #include "parser.h"
 #include "compare_funcs.h"
 
@@ -151,7 +153,13 @@ void tf_ifd_hts_insert(int begin, int end)
     int *counter = NULL;
     for (int i = begin; i <= end; i++)
     {
-        if (file_con[i] == ' ' || file_con[i] == '\"')
+        if(isdigit(file_con[begin_of_word]))
+        {
+            if(file_con[i] == ' ')
+                begin_of_word=i+1;
+        }
+
+        else if (file_con[i] == ' ' || file_con[i] == '\"')
         {
             end_of_word = i;
             word = new string(file_con.substr(begin_of_word, end_of_word - begin_of_word));
