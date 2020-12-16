@@ -222,7 +222,7 @@ int hashfunction_int(Pointer key)
     return (*(int *)key) % HT_SIZE;
 }
 
-void read_files(string main_folder, string folder, HashTable htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
+void read_files(string main_folder, string folder, HashTable htable, HashTable idf_htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
 {
     DIR *dir;
     dirent *dir_item;
@@ -246,8 +246,9 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
             continue;
         }
         name = dir_item->d_name;
-        spec_list = parse(main_folder + "/" + folder + "/" + name);
-        it = new item(folder, atoi(name.erase(name.size() - 5).c_str()), spec_list);
+        it = new item(folder, atoi(name.erase(name.size() - 5).c_str()));
+        spec_list = parse((main_folder + "/" + folder + "/" + name), it->get_words_ht(), idf_htable);
+        it->set_spec_list(spec_list);
         HashTable_Node ht_item_n = new hashtable_node();
         ht_item_n->key = new int(it->get_item_id());
         ht_item_n->value = it;
@@ -259,14 +260,6 @@ void read_files(string main_folder, string folder, HashTable htable) // folder i
     closedir(dir);
 }
 
-int hashfunction(Pointer key)
-{
-    string str = *(string *)key;
-    uint hash = 15, M = 14;
-    for (uint i = 0; i < str.size(); ++i)
-        hash = M * hash + str[i];
-    return hash % HT_SIZE;
-}
 
 void del_main_ht(Pointer value)
 {
@@ -278,6 +271,7 @@ void del_main_ht(Pointer value)
 HashTable read_all_folders(string dir_name)
 {
     HashTable ht = new hashtable(del_main_ht, hashfunction);
+    HashTable idf_ht = new hashtable(NULL, hashfunction);
     struct dirent *de;
     DIR *dr = opendir(dir_name.c_str());
     if (!dr)
@@ -289,7 +283,7 @@ HashTable read_all_folders(string dir_name)
     {
         if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
-        read_files(dir_name, de->d_name, ht);
+        read_files(dir_name, de->d_name, ht, idf_ht);
     }
     closedir(dr);
     return ht;

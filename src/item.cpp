@@ -5,12 +5,22 @@ int hashfunction_address(Pointer value)
     return (long int)value % HT_SIZE;
 }
 
-item::item(string fldr, int i, List spec_list) : folder(fldr), id(i), specs(spec_list)
+int hashfunction(Pointer key)
+{
+    string str = *(string *)key;
+    uint hash = 15, M = 14;
+    for (uint i = 0; i < str.size(); ++i)
+        hash = M * hash + str[i];
+    return hash % HT_SIZE;
+}
+
+item::item(string fldr, int i ): folder(fldr), id(i)
 {
 
     common_and_uncommon.common = new list(NULL);
     common_and_uncommon.uncommon = new hashtable(NULL,hashfunction_address);
     common_and_uncommon.common->list_insert_next(LIST_BOF, this);
+    words = new hashtable(NULL,hashfunction);
 
     // printf("Debug!!%s//%d   %d  \n",folder.c_str(),id,common_list->list_size());
 }
@@ -51,3 +61,32 @@ void item::change_uncommon_ht(HashTable ht)
 {
     common_and_uncommon.uncommon = ht;
 }
+
+void item::set_spec_list(List spec)
+{
+    specs=spec;
+}
+List item::get_spec_list()
+{
+    return specs;
+}
+HashTable item::get_words_ht()
+{
+    return words;
+}
+
+void item::set_tables(int *bow, float* tfidf)
+{
+    array_BoW=bow;
+    array_TF_IDF=tfidf;
+}
+int * item::get_bow()
+{
+    return array_BoW;
+}
+
+float * item::get_tfidf()
+{
+    return array_TF_IDF;
+}
+

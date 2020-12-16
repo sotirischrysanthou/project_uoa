@@ -1,7 +1,7 @@
 #include <acutest.h>
 #include "functions.h"
 
-int lines_counter(char *filename)
+int lines_counter(const char *filename)
 {
     FILE *fp; 
     int count = 0;

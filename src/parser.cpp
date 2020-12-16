@@ -157,7 +157,7 @@ void tf_ifd_hts_insert(int begin, int end)
             word = new string(file_con.substr(begin_of_word, end_of_word - begin_of_word));
             counter = (int *)tf_ht->search(word, cmp_hashtable_search);
             if (counter)
-                *counter++;
+                (*counter)++;
             else
             {
                 counter = new int(1);
@@ -168,7 +168,7 @@ void tf_ifd_hts_insert(int begin, int end)
 
                 counter = (int *)idf_ht->search(word, cmp_hashtable_search);
                 if (counter)
-                    *counter++;
+                    (*counter)++;
                 else
                 {
                     counter = new int(1);
@@ -195,7 +195,8 @@ string get_string()
 
     end = ch;
     ch++;
-
+    if(tf_ht&&idf_ht)
+        tf_ifd_hts_insert(begin, end);
     
 
     return file_con.substr(begin, end - begin);
