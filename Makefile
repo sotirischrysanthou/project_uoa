@@ -1,5 +1,5 @@
 CXX=       	g++
-CXXFLAGS= 	-g -gdwarf-2 -std=gnu++11 -Wall -Iinclude -fPIC
+CXXFLAGS= 	-g -gdwarf-2 -std=gnu++11 -Wall -Iinclude -fPIC -lm
 LDFLAGS=	-Llib
 AR=		ar
 ARFLAGS=	rcs

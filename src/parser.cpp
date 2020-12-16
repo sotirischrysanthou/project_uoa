@@ -1,9 +1,11 @@
 #include "parser.h"
+#include "compare_funcs.h"
 
 List l = NULL;
 string file_con;
 int ch = 0;
-int pos;
+HashTable tf_ht = NULL;
+HashTable idf_ht = NULL;
 
 /* j_pairs list */
 List json_con;
@@ -128,6 +130,59 @@ int end_of_string()
     return end_of_string();
 }
 
+/**
+     * * pseudocode
+     * 
+     * find_word
+     * if(word exists in tf_ht)
+     *      tf_ht word counter++;
+     * else
+     *      tf_ht.insert(word)
+     *      if(word exists in idf_ht)
+     *          idf_ht word counter++
+     *      else
+     *          idf_ht.insert(word)
+     **/
+void tf_ifd_hts_insert(int begin, int end)
+{
+    int begin_of_word = begin;
+    int end_of_word;
+    string *word;
+    int *counter = NULL;
+    for (int i = begin; i <= end; i++)
+    {
+        if (file_con[i] == ' ' || file_con[i] == '\"')
+        {
+            end_of_word = i;
+            word = new string(file_con.substr(begin_of_word, end_of_word - begin_of_word));
+            counter = (int *)tf_ht->search(word, cmp_hashtable_search);
+            if (counter)
+                *counter++;
+            else
+            {
+                counter = new int(1);
+                HashTable_Node ht_n = new hashtable_node;
+                ht_n->key = word;
+                ht_n->value = counter;
+                tf_ht->insert(ht_n);
+
+                counter = (int *)idf_ht->search(word, cmp_hashtable_search);
+                if (counter)
+                    *counter++;
+                else
+                {
+                    counter = new int(1);
+                    ht_n = new hashtable_node;
+                    ht_n->key = word;
+                    ht_n->value = counter;
+                    idf_ht->insert(ht_n);
+                }
+            }
+            begin_of_word=i+1;
+        }
+    }
+}
+
 string get_string()
 {
     int begin = ch, end;
@@ -141,8 +196,9 @@ string get_string()
     end = ch;
     ch++;
 
-    return file_con.substr(begin, end - begin);
     
+
+    return file_con.substr(begin, end - begin);
 }
 
 j_pair *json_pair()
@@ -151,7 +207,7 @@ j_pair *json_pair()
 
     ch++;
     new_pair = new j_pair;
-    new_pair->type=PAIRS;
+    new_pair->type = PAIRS;
     new_pair->title = new string(get_string());
     if (new_pair->title->compare("ERROR_PARSING_STRING") == 0)
     {
@@ -358,7 +414,7 @@ List create_jTable()
     return tList;
 }
 
-List parse(string filename)
+List parse(string filename, HashTable returned_tf, HashTable receved_idf)
 {
     FILE *stream = NULL;
     stream = fopen(filename.c_str(), "r");
@@ -372,16 +428,16 @@ List parse(string filename)
     {
         fread(buffer, 1, length, stream);
     }
+
+    idf_ht = receved_idf;
+    tf_ht = returned_tf;
+
     file_con = buffer;
     ch = 0;
     json_con = NULL;
     json_con = create_jList_of_pairs();
     free(buffer);
     fclose(stream);
-    if (json_con == NULL)
-    {
-        return NULL;
-    }
     return json_con;
 }
 

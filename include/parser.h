@@ -4,6 +4,7 @@
 #include <string>
 #include "common_types.h"
 #include "List.h"
+#include "hashtable.h"
 
 
 #define PAIRS 'p'
@@ -36,6 +37,6 @@ List create_jList_of_pairs();
 json_table_node *json_table();
 List create_jTable();
 /* parse the file and insert all specs into list that is returned */
-List parse(string filename);
+List parse(string filename, HashTable returned_tf=NULL, HashTable receved_idf=NULL);
 
 #endif
