@@ -34,6 +34,7 @@ void test_medium(void)
     fclose(output_file);
     if(!TEST_CHECK(lines_counter("./output_test_medium.txt")==3582))
         TEST_MSG("incorrect output");
+    c++;
     delete HT;
 }
 
@@ -51,6 +52,7 @@ void test_large(void)
     if(!TEST_CHECK(lines_counter("./output_test_large.txt")==42535))
         TEST_MSG("incorrect output");
     delete HT;
+    c++;
 }
 
 TEST_LIST = {

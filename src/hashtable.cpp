@@ -59,6 +59,23 @@ List hashtable::return_list()
     return l;
 }
 
+List hashtable::return_ht_nodes()
+{
+    List l = new list(NULL);
+    HashTable_Node temp;
+    for (int i = 0; i < HT_SIZE; i++)
+    {
+        ListNode tempNode = table[i]->list_first();
+        while (tempNode != NULL)
+        {
+            temp = (HashTable_Node)(table[i]->list_node_value(tempNode));
+            l->list_insert_next(l->list_last(), temp);
+            tempNode = table[i]->list_next(tempNode);
+        }
+    }
+    return l;
+}
+
 int cmp(Pointer a, Pointer b)
 {
     return ((ListNode)b)->next->value == a;

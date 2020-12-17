@@ -23,3 +23,5 @@ void read_csv(string filename, HashTable ht);
 void print_all(HashTable ht,FILE *output_file=stdout);
 /* set the values for BoW (0) or Tf-Idf (1) */
 void set_Bow_or_TfIdf(HashTable ht, HashTable tfidf, int Item_count, bool flag);
+
+void del_main_ht(Pointer value);

@@ -276,14 +276,12 @@ void del_main_ht(Pointer value)
 int read_all_folders(string dir_name, HashTable ht, HashTable idf_ht)
 {
     int count = 0;
-    ht = new hashtable(del_main_ht, hashfunction);
-    idf_ht = new hashtable(NULL, hashfunction);
     struct dirent *de;
     DIR *dr = opendir(dir_name.c_str());
     if (!dr)
     {
         perror(dir_name.c_str());
-        return NULL;
+        exit(1);
     }
     while ((de = readdir(dr)) != NULL)
     {
@@ -401,7 +399,7 @@ void print_all(HashTable ht, FILE *output_file)
 void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
 {
     List ht_l = ht->return_list();
-    List idf_l = idf->return_list();
+    List idf_l = idf->return_ht_nodes();
     ListNode ht_l_node=ht_l->list_first();
     while (ht_l_node!=NULL)
     {
@@ -418,7 +416,7 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
                 int i=0;
                 while(l_node!=NULL)
                 {
-                    int * tmp = (int *)it->get_words_ht()->search((string*)(l_node->value), cmp_hashtable_search);
+                    int * tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
                     if(tmp!=NULL)
                         bow[i]=*tmp;
                     else
@@ -435,7 +433,7 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
                 int i=0;
                 while(l_node!=NULL)
                 {
-                    int * tmp = (int *)it->get_words_ht()->search((string*)(l_node->value), cmp_hashtable_search);
+                    int * tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
                     if(tmp!=NULL)
                     {
                         tfidf[i]=((*tmp)/it->get_words_ht()->ht_size()) * log((item_count*1.0)/(*(int*)(l_node->value)));

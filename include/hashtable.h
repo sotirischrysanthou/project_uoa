@@ -6,7 +6,7 @@
 #include <string>
 #include "List.h"
 
-#define  HT_SIZE 500
+#define  HT_SIZE 1000
 
 
 
@@ -34,6 +34,7 @@ public:
     Pointer search(Pointer value,CompareFunc compare);
     void insert(hashtable_node* value);
     List return_list();
+    List return_ht_nodes();
     void remove(Pointer value);
     int ht_size();
 };
