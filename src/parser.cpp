@@ -185,10 +185,12 @@ void tf_ifd_hts_insert(int begin, int end)
 
                 counter = (int *)idf_ht->search(word, cmp_hashtable_search);
                 if (counter)
-                    (*counter)++;
+                    counter[1]++;
                 else
                 {
-                    counter = new int(1);
+                    counter = new int[2];
+                    counter[0]=idf_ht->ht_size();
+                    counter[1]=1;
                     ht_n = new hashtable_node;
                     ht_n->key = word;
                     ht_n->value = counter;

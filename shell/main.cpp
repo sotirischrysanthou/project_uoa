@@ -12,12 +12,12 @@ int main(int argc, char const *argv[])
     HashTable HT = new hashtable(del_main_ht, hashfunction);
     HashTable tf_idf = new hashtable(NULL, hashfunction);
     // int count = read_all_folders("./data/2013_camera_specs", HT, tf_idf);
-    int count = read_all_folders("./data/test_small_data", HT, tf_idf);
+    int count = read_all_folders("./data/2013_camera_specs", HT, tf_idf);
     assert(HT != NULL);
 
     // stop timer
     gettimeofday(&t2, NULL);
-    // compute and print the elapsed time in millisec
+    // compute and print the elapsed time in secs
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
     printf("%f s. for json\n", elapsedTime);
@@ -29,14 +29,14 @@ int main(int argc, char const *argv[])
 
     // stop timer
     gettimeofday(&t2, NULL);
-    // compute and print the elapsed time in millisec
+    // compute and print the elapsed time in secs
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
     printf("%f s. for BoW and Tf-Idf\n", elapsedTime);
     gettimeofday(&t1, NULL);
-    read_csv("./data/sigmod_medium_labelled_dataset.csv", HT);
+    read_csv("./data/sigmod_large_labelled_dataset.csv", HT);
     gettimeofday(&t2, NULL);
-    // compute and print the elapsed time in millisec
+    // compute and print the elapsed time in sec
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
     printf("%f s. for csv\n", elapsedTime);
@@ -50,7 +50,7 @@ int main(int argc, char const *argv[])
 
     // stop timer
     gettimeofday(&t2, NULL);
-    // compute and print the elapsed time in millisec
+    // compute and print the elapsed time in secs
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
     printf("%f s. for print/delete\n", elapsedTime);

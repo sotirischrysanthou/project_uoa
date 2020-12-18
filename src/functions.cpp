@@ -404,12 +404,12 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
     {
         if((*(int*)(((HashTable_Node)(l_node->value))->value)) <2)
         {
-            // printf("%d\n",c++);
+            printf("%d\n",c++);
             idf->remove((((HashTable_Node)(l_node->value))->key));
         }
         l_node = l_node->next;
     }
-    idf_l = idf->return_ht_nodes();
+
     while (ht_l_node != NULL)
     {
         List ht_ll = ((HashTable)(ht_l_node->value))->return_list();
@@ -421,15 +421,14 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
             {
                 int *bow = new int[idf->ht_size()];
                 it->set_tables(bow, NULL);
-                l_node = idf_l->list_first();
+                List words_list = it->get_words_ht()->return_ht_nodes();
+                l_node = words_list->list_first();
                 int i = 0;
                 while (l_node != NULL)
                 {
-                    int *tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
+                    int *tmp = (int *)idf->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
                     if (tmp != NULL)
-                        bow[i] = *tmp;
-                    else
-                        bow[i] = 0;
+                        bow[tmp[0]] = tmp[1];
 
                     l_node = l_node->next;
                 }
