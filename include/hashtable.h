@@ -35,7 +35,7 @@ public:
     void insert(hashtable_node* value);
     List return_list();
     List return_ht_nodes();
-    void remove(Pointer value);
+    void remove(Pointer key);
     int ht_size();
 };
 

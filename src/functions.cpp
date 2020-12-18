@@ -3,7 +3,6 @@
 #include <sys/time.h>
 #include <math.h>
 
-
 // void similar_items(item *A, item *B)
 // {
 //     List Acommon_l = A->get_common_and_uncommon().common;
@@ -68,19 +67,17 @@
 
 //     delete to_del_l;
 
-    
 // }
-
 
 void similar_items(item *A, item *B)
 {
-    if (A->get_common_and_uncommon().common==B->get_common_and_uncommon().common)
+    if (A->get_common_and_uncommon().common == B->get_common_and_uncommon().common)
         return;
-    if (A->get_common_and_uncommon().uncommon->ht_size()<B->get_common_and_uncommon().uncommon->ht_size())
+    if (A->get_common_and_uncommon().uncommon->ht_size() < B->get_common_and_uncommon().uncommon->ht_size())
     {
-        item * tmp = A;
-        A=B;
-        B=tmp;
+        item *tmp = A;
+        A = B;
+        B = tmp;
     }
     List common_a = A->get_common_and_uncommon().common;
     List common_b = B->get_common_and_uncommon().common;
@@ -88,28 +85,26 @@ void similar_items(item *A, item *B)
     HashTable uncommon_b = B->get_common_and_uncommon().uncommon;
 
     ListNode tempNode;
-    
-    
 
     tempNode = uncommon_b->return_list()->list_first();
-    while(tempNode!=NULL)
+    while (tempNode != NULL)
     {
-        if(uncommon_a->search(tempNode->value, cmp_hashtable_search_address))
+        if (uncommon_a->search(tempNode->value, cmp_hashtable_search_address))
         {
             // ((item*)((((List)(tempNode->value))->list_first())->value))->get_common_and_uncommon().uncommon->remove(common_b);
             List t_L = (List)(tempNode->value);
             ListNode t_LN = t_L->list_first();
-            item* t_i = (item*)t_LN->value;
+            item *t_i = (item *)t_LN->value;
             HashTable t_ht = t_i->get_common_and_uncommon().uncommon;
-            assert(t_ht!=NULL);
+            assert(t_ht != NULL);
             // printf("removing...\n");
             t_ht->remove(common_b);
         }
         else
         {
             HashTable_Node ht_n = new hashtable_node;
-            ht_n->key=tempNode->value;
-            ht_n->value=tempNode->value;
+            ht_n->key = tempNode->value;
+            ht_n->value = tempNode->value;
             uncommon_a->insert(ht_n);
 
             List t_L = (List)(tempNode->value);
@@ -123,33 +118,32 @@ void similar_items(item *A, item *B)
             ht_n->value = common_a;
             t_ht->insert(ht_n);
         }
-        
+
         tempNode = tempNode->next;
     }
     tempNode = common_b->list_first();
-    while(tempNode!=NULL)
+    while (tempNode != NULL)
     {
-        item* tempItem = (item *)common_b->list_node_value(tempNode);
+        item *tempItem = (item *)common_b->list_node_value(tempNode);
         tempItem->change_common_list(common_a);
         tempItem->change_uncommon_ht(uncommon_a);
         common_a->list_insert_next(common_a->list_last(), tempItem);
         tempNode = common_b->list_next(tempNode);
     }
-
 }
 
-void dissimilar_items(item *a,item *b)
+void dissimilar_items(item *a, item *b)
 {
     HashTable_Node ht_n;
 
-    ht_n=new hashtable_node;
-    ht_n->key=b->get_common_and_uncommon().common;
-    ht_n->value=b->get_common_and_uncommon().common;
+    ht_n = new hashtable_node;
+    ht_n->key = b->get_common_and_uncommon().common;
+    ht_n->value = b->get_common_and_uncommon().common;
     a->get_common_and_uncommon().uncommon->insert(ht_n);
 
-    ht_n=new hashtable_node;
-    ht_n->key=a->get_common_and_uncommon().common;
-    ht_n->value=a->get_common_and_uncommon().common;
+    ht_n = new hashtable_node;
+    ht_n->key = a->get_common_and_uncommon().common;
+    ht_n->value = a->get_common_and_uncommon().common;
     b->get_common_and_uncommon().uncommon->insert(ht_n);
 }
 
@@ -248,7 +242,7 @@ int read_files(string main_folder, string folder, HashTable htable, HashTable id
             continue;
         }
         name = dir_item->d_name;
-        it = new item(folder, atoi(name.substr(0,name.size() - 5).c_str()));
+        it = new item(folder, atoi(name.substr(0, name.size() - 5).c_str()));
         // printf("parsing...\n");
         spec_list = parse(main_folder + "/" + folder + "/" + name, it->get_words_ht(), idf_htable);
         // printf("finished parsing...\n");
@@ -264,7 +258,6 @@ int read_files(string main_folder, string folder, HashTable htable, HashTable id
     closedir(dir);
     return ht_items->ht_size();
 }
-
 
 void del_main_ht(Pointer value)
 {
@@ -285,20 +278,20 @@ int read_all_folders(string dir_name, HashTable ht, HashTable idf_ht)
     }
     while ((de = readdir(dr)) != NULL)
     {
-    struct timeval t1, t2;
-    double elapsedTime;
-    gettimeofday(&t1, NULL);
+        struct timeval t1, t2;
+        double elapsedTime;
+        gettimeofday(&t1, NULL);
 
         if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
         count += read_files(dir_name, de->d_name, ht, idf_ht);
 
-    gettimeofday(&t2, NULL);
-    elapsedTime = (t2.tv_sec - t1.tv_sec);      // sec to ms
-    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0;   // us to ms
-    printf("%f s. for %s\n", elapsedTime,de->d_name);
+        gettimeofday(&t2, NULL);
+        elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
+        elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
+        printf("%f s. for %s\n", elapsedTime, de->d_name);
     }
-    
+
     closedir(dr);
     return count;
 }
@@ -345,9 +338,8 @@ void read_csv(string filename, HashTable ht)
         }
         else
         {
-            dissimilar_items(it1,it2);
+            dissimilar_items(it1, it2);
         }
-        
     }
     free(buffer);
     fclose(stream);
@@ -400,53 +392,64 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
 {
     List ht_l = ht->return_list();
     List idf_l = idf->return_ht_nodes();
-    ListNode ht_l_node=ht_l->list_first();
-    while (ht_l_node!=NULL)
+    ListNode ht_l_node = ht_l->list_first();
+    ListNode l_node = idf_l->list_first();
+    int c=0;
+    while (l_node != NULL)
+    {
+        if((*(int*)(((HashTable_Node)(l_node->value))->value)) <10)
+        {
+            printf("%d\n",c++);
+            idf->remove((((HashTable_Node)(l_node->value))->key));
+        }
+        l_node = l_node->next;
+    }
+    idf_l = idf->return_ht_nodes();
+    while (ht_l_node != NULL)
     {
         List ht_ll = ((HashTable)(ht_l_node->value))->return_list();
         ListNode ht_ll_node = ht_ll->list_first();
-        while(ht_ll_node!=NULL)
+        while (ht_ll_node != NULL)
         {
-            item* it = (item*)(ht_ll_node->value);
-            if(!flag)
+            item *it = (item *)(ht_ll_node->value);
+            if (!flag)
             {
                 int *bow = new int[idf->ht_size()];
                 it->set_tables(bow, NULL);
-                ListNode l_node=idf_l->list_first();
-                int i=0;
-                while(l_node!=NULL)
+                l_node = idf_l->list_first();
+                int i = 0;
+                while (l_node != NULL)
                 {
-                    int * tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
-                    if(tmp!=NULL)
-                        bow[i]=*tmp;
+                    int *tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
+                    if (tmp != NULL)
+                        bow[i] = *tmp;
                     else
-                        bow[i]=0;
-                    
-                    l_node=l_node->next;
+                        bow[i] = 0;
+
+                    l_node = l_node->next;
                 }
             }
             else
             {
                 float *tfidf = new float[idf->ht_size()];
                 it->set_tables(NULL, tfidf);
-                ListNode l_node=idf_l->list_first();
-                int i=0;
-                while(l_node!=NULL)
+                l_node = idf_l->list_first();
+                int i = 0;
+                while (l_node != NULL)
                 {
-                    int * tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
-                    if(tmp!=NULL)
+                    int *tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
+                    if (tmp != NULL)
                     {
-                        tfidf[i]=((*tmp)/it->get_words_ht()->ht_size()) * log((item_count*1.0)/(*(int*)(l_node->value)));
+                        tfidf[i] = (((*tmp) * 1.0) / it->get_words_ht()->ht_size()) * log((item_count * 1.0) / (*(int *)(((HashTable_Node)(l_node->value))->value)));
                     }
                     else
-                        tfidf[i]=0;
-                    l_node=l_node->next;
+                        tfidf[i] = 0;
+                    l_node = l_node->next;
                 }
             }
-            
-            ht_ll_node=ht_ll_node->next;
+
+            ht_ll_node = ht_ll_node->next;
         }
-        ht_l_node=ht_l_node->next;
+        ht_l_node = ht_l_node->next;
     }
-    
 }
