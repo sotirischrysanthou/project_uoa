@@ -11,7 +11,8 @@ int main(int argc, char const *argv[])
 
     HashTable HT = new hashtable(del_main_ht, hashfunction);
     HashTable tf_idf = new hashtable(NULL, hashfunction);
-    int count = read_all_folders("./data/2013_camera_specs", HT, tf_idf);
+    // int count = read_all_folders("./data/2013_camera_specs", HT, tf_idf);
+    int count = read_all_folders("./data/test_small_data", HT, tf_idf);
     assert(HT != NULL);
 
     // stop timer
@@ -31,7 +32,7 @@ int main(int argc, char const *argv[])
     // compute and print the elapsed time in millisec
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
-    printf("%f s. for json\n", elapsedTime);
+    printf("%f s. for BoW and Tf-Idf\n", elapsedTime);
     gettimeofday(&t1, NULL);
     read_csv("./data/sigmod_medium_labelled_dataset.csv", HT);
     gettimeofday(&t2, NULL);

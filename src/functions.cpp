@@ -327,9 +327,14 @@ void read_csv(string filename, HashTable ht)
 
         // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
 
+
         ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
+        if(ht_items==NULL)
+            continue;
         it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
         ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
+        if(ht_items==NULL)
+            continue;
         it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
         if (similar)
         {
@@ -397,9 +402,9 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
     int c=0;
     while (l_node != NULL)
     {
-        if((*(int*)(((HashTable_Node)(l_node->value))->value)) <10)
+        if((*(int*)(((HashTable_Node)(l_node->value))->value)) <2)
         {
-            printf("%d\n",c++);
+            // printf("%d\n",c++);
             idf->remove((((HashTable_Node)(l_node->value))->key));
         }
         l_node = l_node->next;

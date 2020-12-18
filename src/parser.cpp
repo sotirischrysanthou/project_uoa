@@ -116,6 +116,10 @@ int end_of_string()
 {
     for (; file_con[ch] != '\"'; ch++)
     {
+        if(file_con[ch]=='.'||file_con[ch]==','||file_con[ch]==';'||file_con[ch]=='?'||file_con[ch]=='\''||file_con[ch]=='('||file_con[ch]==')')
+            file_con[ch]=' ';
+        else if (file_con[ch]>='A'&&file_con[ch]<='Z')
+            file_con[ch]=file_con[ch]-('A'-'a');
         if (file_con[ch] == '\n')
             return 1;
     }
