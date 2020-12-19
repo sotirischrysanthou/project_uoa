@@ -34,4 +34,7 @@ $(TEST_PROGRAM):	$(TEST_OBJECTS) $(LIB_STATIC)
 clean:
 	rm -f $(LIB_OBJECTS) $(LIB_STATIC) $(SHELL_OBJECTS) $(SHELL_PROGRAM) $(TEST_PROGRAM) $(TEST_OBJECTS)
 
+clear_out:
+	rm -f output*
+
 .PHONY: all clean

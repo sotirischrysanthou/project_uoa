@@ -29,6 +29,7 @@ void test_medium(void)
     if (!TEST_CHECK(HT != NULL))
         TEST_MSG("reading folders failed");
     read_csv("./data/sigmod_medium_labelled_dataset.csv", HT);
+    set_Bow_or_TfIdf(HT, IDF, c, 0);
     FILE *output_file = fopen("./output_test_medium.txt", "w");
     print_all(HT, output_file);
     fclose(output_file);
@@ -45,6 +46,7 @@ void test_large(void)
     int c = read_all_folders("./data/2013_camera_specs", HT, IDF);
     if (TEST_CHECK(HT != NULL))
         TEST_MSG("reading folders failed");
+    set_Bow_or_TfIdf(HT, IDF, c, 0);
     read_csv("./data/sigmod_large_labelled_dataset.csv", HT);
     FILE *output_file = fopen("./output_test_large.txt", "w");
     print_all(HT, output_file);
