@@ -9,8 +9,8 @@ int main(int argc, char const *argv[])
     // start timer
     gettimeofday(&t1, NULL);
 
-    HashTable HT = new hashtable(del_main_ht, hashfunction);
-    HashTable tf_idf = new hashtable(NULL, hashfunction);
+    HashTable HT = new hashtable(10,del_main_ht, hashfunction);
+    HashTable tf_idf = new hashtable(500,NULL, hashfunction);
     // int count = read_all_folders("./data/2013_camera_specs", HT, tf_idf);
     int count = read_all_folders("./data/2013_camera_specs", HT, tf_idf);
     assert(HT != NULL);
@@ -25,7 +25,7 @@ int main(int argc, char const *argv[])
     // start timer
     gettimeofday(&t1, NULL);
 
-    set_Bow_or_TfIdf(HT, tf_idf, count, 0);
+    set_Bow_or_TfIdf(HT, tf_idf, count, 1);
 
     // stop timer
     gettimeofday(&t2, NULL);

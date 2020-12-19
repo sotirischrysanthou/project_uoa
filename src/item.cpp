@@ -1,26 +1,26 @@
 #include "item.h"
 
-int hashfunction_address(Pointer value)
+int hashfunction_address(Pointer value,int buckets)
 {
-    return (long int)value % HT_SIZE;
+    return (long int)value % buckets;
 }
 
-int hashfunction(Pointer key)
+int hashfunction(Pointer key,int buckets)
 {
     string str = *(string *)key;
     uint hash = 15, M = 14;
     for (uint i = 0; i < str.size(); ++i)
         hash = M * hash + str[i];
-    return hash % HT_SIZE;
+    return hash % buckets;
 }
 
 item::item(string fldr, int i ): folder(fldr), id(i)
 {
 
     common_and_uncommon.common = new list(NULL);
-    common_and_uncommon.uncommon = new hashtable(NULL,hashfunction_address);
+    common_and_uncommon.uncommon = new hashtable(100,NULL,hashfunction_address);
     common_and_uncommon.common->list_insert_next(LIST_BOF, this);
-    words = new hashtable(NULL,hashfunction);
+    words = new hashtable(50,NULL,hashfunction);
 
     // printf("Debug!!%s//%d   %d  \n",folder.c_str(),id,common_list->list_size());
 }

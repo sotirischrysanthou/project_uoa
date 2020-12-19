@@ -2,17 +2,20 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <assert.h>
+
 
 #include "../include/hashtable.h"
 
 using namespace std;
 
-hashtable::hashtable(DestroyFunc destroy_value, hashFunc hashfunction)
+hashtable::hashtable(int buckets,DestroyFunc destroy_value, hashFunc hashfunction)
 {
+    this->buckets=buckets;
     this->destroy_value = destroy_value;
     this->hashfunction = hashfunction;
-
-    for (int i = 0; i < HT_SIZE; i++)
+    table=new List[buckets];
+    for (int i = 0; i < buckets; i++)
     {
         table[i] = new list(destroy_value);
     }
@@ -21,7 +24,7 @@ hashtable::hashtable(DestroyFunc destroy_value, hashFunc hashfunction)
 
 hashtable::~hashtable()
 {
-    for (int i = 0; i < HT_SIZE; i++)
+    for (int i = 0; i < buckets; i++)
     {
         delete table[i];
     }
@@ -29,7 +32,7 @@ hashtable::~hashtable()
 
 Pointer hashtable::search(Pointer key, CompareFunc compare)
 {
-    List chain = table[hashfunction(key)];
+    List chain = table[hashfunction(key,buckets)];
     HashTable_Node temp = (HashTable_Node)(chain->list_find(key, compare));
 
     return temp == NULL ? NULL : temp->value;
@@ -37,7 +40,7 @@ Pointer hashtable::search(Pointer key, CompareFunc compare)
 
 void hashtable::insert(hashtable_node *value)
 {
-    List chain = table[hashfunction(value->key)];
+    List chain = table[hashfunction(value->key,buckets)];
     chain->list_insert_next(chain->list_last(), (Pointer)value);
     size++;
 }
@@ -46,7 +49,7 @@ List hashtable::return_list()
 {
     List l = new list(NULL);
     HashTable_Node temp;
-    for (int i = 0; i < HT_SIZE; i++)
+    for (int i = 0; i < buckets; i++)
     {
         ListNode tempNode = table[i]->list_first();
         while (tempNode != NULL)
@@ -63,7 +66,7 @@ List hashtable::return_ht_nodes()
 {
     List l = new list(NULL);
     HashTable_Node temp;
-    for (int i = 0; i < HT_SIZE; i++)
+    for (int i = 0; i < buckets; i++)
     {
         ListNode tempNode = table[i]->list_first();
         while (tempNode != NULL)
@@ -83,12 +86,8 @@ int cmp(Pointer a, Pointer b)
 
 void hashtable::remove(Pointer key)
 {
-    List chain = table[hashfunction(key)];
-    if(chain->list_size()==0)
-    {
-        printf("nooooooooooot\n");
-        return;
-    }
+    List chain = table[hashfunction(key,buckets)];
+    assert(chain->list_size()!=0);
     ListNode tempNode = chain->list_first();
     if (tempNode->value == key)
     {

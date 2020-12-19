@@ -213,9 +213,9 @@ void del_item_ht(Pointer value)
     delete (HashTable_Node)value;
 }
 
-int hashfunction_int(Pointer key)
+int hashfunction_int(Pointer key,int buckets)
 {
-    return (*(int *)key) % HT_SIZE;
+    return (*(int *)key) % buckets;
 }
 
 int read_files(string main_folder, string folder, HashTable htable, HashTable idf_htable) // folder is inner folder (ex. ebay.com) ./data/2013_camera_specs/buy.net/4233.json
@@ -225,7 +225,7 @@ int read_files(string main_folder, string folder, HashTable htable, HashTable id
 
     string name;
 
-    HashTable ht_items = new hashtable(del_item_ht, hashfunction_int);
+    HashTable ht_items = new hashtable(300,del_item_ht, hashfunction_int);
     HashTable_Node ht_n = new hashtable_node();
     ht_n->key = new string(folder);
     ht_n->value = ht_items;
@@ -373,7 +373,7 @@ void del_visited_lists_ht(Pointer value)
 
 void print_all(HashTable ht, FILE *output_file)
 {
-    visited_lists = new hashtable(del_visited_lists_ht, hashfunction);
+    visited_lists = new hashtable(200,del_visited_lists_ht, hashfunction);
     output = output_file;
     List hts = ht->return_list();
     ListNode tempNode = hts->list_first();
@@ -399,7 +399,7 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
     List idf_l = idf->return_ht_nodes();
     ListNode ht_l_node = ht_l->list_first();
     ListNode l_node = idf_l->list_first();
-    int c=0;
+    int c=1;
     while (l_node != NULL)
     {
         if((*(int*)(((HashTable_Node)(l_node->value))->value)) <2)
@@ -423,7 +423,6 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
                 it->set_tables(bow, NULL);
                 List words_list = it->get_words_ht()->return_ht_nodes();
                 l_node = words_list->list_first();
-                int i = 0;
                 while (l_node != NULL)
                 {
                     int *tmp = (int *)idf->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
@@ -437,17 +436,14 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
             {
                 float *tfidf = new float[idf->ht_size()];
                 it->set_tables(NULL, tfidf);
-                l_node = idf_l->list_first();
-                int i = 0;
+                List words_list = it->get_words_ht()->return_ht_nodes();
+                l_node = words_list->list_first();
                 while (l_node != NULL)
                 {
-                    int *tmp = (int *)it->get_words_ht()->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
+                    int *tmp = (int *)idf->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
                     if (tmp != NULL)
-                    {
-                        tfidf[i] = (((*tmp) * 1.0) / it->get_words_ht()->ht_size()) * log((item_count * 1.0) / (*(int *)(((HashTable_Node)(l_node->value))->value)));
-                    }
-                    else
-                        tfidf[i] = 0;
+                        tfidf[tmp[0]] = (((tmp[1]) * 1.0) / it->get_words_ht()->ht_size()) * log((item_count * 1.0) / (*(int *)(((HashTable_Node)(l_node->value))->value)));
+
                     l_node = l_node->next;
                 }
             }

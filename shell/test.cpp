@@ -23,8 +23,8 @@ int lines_counter(const char *filename)
 
 void test_medium(void)
 {
-    HashTable HT = new hashtable(del_main_ht, hashfunction);
-    HashTable IDF =  new hashtable(NULL, hashfunction);
+    HashTable HT = new hashtable(10,del_main_ht, hashfunction);
+    HashTable IDF =  new hashtable(500,NULL, hashfunction);
     int c = read_all_folders("./data/2013_camera_specs", HT, IDF);
     if (!TEST_CHECK(HT != NULL))
         TEST_MSG("reading folders failed");
@@ -40,8 +40,8 @@ void test_medium(void)
 
 void test_large(void)
 {
-    HashTable HT = new hashtable(del_main_ht, hashfunction);
-    HashTable IDF =  new hashtable(NULL, hashfunction);
+    HashTable HT = new hashtable(10,del_main_ht, hashfunction);
+    HashTable IDF =  new hashtable(500,NULL, hashfunction);
     int c = read_all_folders("./data/2013_camera_specs", HT, IDF);
     if (TEST_CHECK(HT != NULL))
         TEST_MSG("reading folders failed");
