@@ -22,8 +22,7 @@ class item
     connections common_and_uncommon;
     List specs; /* a list of all of the item's specs, parsed from the json file */
     HashTable words;
-    int *array_BoW;
-    float *array_TF_IDF;
+    float *array;
 
 public:
     item(string fldr, int i);
@@ -40,9 +39,8 @@ public:
     void set_spec_list(List spec);
     List get_spec_list();
     HashTable get_words_ht();
-    void set_tables(int *bow, float *tfidf);
-    int *get_bow();
-    float *get_tfidf();
+    void set_table(float *table);
+    float *get_bow_tfidf();
 };
 
 #endif

@@ -43,6 +43,7 @@ int main(int argc, char const *argv[])
     gettimeofday(&t1, NULL); // start timer
     
     read_csv(csv_file, HT);
+    float *b = train(csv_file, HT, tf_idf, 1);
     
     gettimeofday(&t2, NULL); // stop timer
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms

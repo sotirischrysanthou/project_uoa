@@ -25,3 +25,7 @@ void print_all(HashTable ht,FILE *output_file=stdout);
 void set_Bow_or_TfIdf(HashTable ht, HashTable tfidf, int Item_count, bool flag);
 
 void del_main_ht(Pointer value);
+
+int lines_counter(const char *filename);
+float *train(string filename, HashTable ht, HashTable idf, int reps);
+

@@ -75,18 +75,13 @@ HashTable item::get_words_ht()
     return words;
 }
 
-void item::set_tables(int *bow, float* tfidf)
+void item::set_table(float* table)
 {
-    array_BoW=bow;
-    array_TF_IDF=tfidf;
-}
-int * item::get_bow()
-{
-    return array_BoW;
+    array=table;
 }
 
-float * item::get_tfidf()
+float * item::get_bow_tfidf()
 {
-    return array_TF_IDF;
+    return array;
 }
 

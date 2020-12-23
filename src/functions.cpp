@@ -213,7 +213,7 @@ void del_item_ht(Pointer value)
     delete (HashTable_Node)value;
 }
 
-int hashfunction_int(Pointer key,int buckets)
+int hashfunction_int(Pointer key, int buckets)
 {
     return (*(int *)key) % buckets;
 }
@@ -225,7 +225,7 @@ int read_files(string main_folder, string folder, HashTable htable, HashTable id
 
     string name;
 
-    HashTable ht_items = new hashtable(300,del_item_ht, hashfunction_int);
+    HashTable ht_items = new hashtable(300, del_item_ht, hashfunction_int);
     HashTable_Node ht_n = new hashtable_node();
     ht_n->key = new string(folder);
     ht_n->value = ht_items;
@@ -327,18 +327,16 @@ void read_csv(string filename, HashTable ht)
 
         // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
 
-
         ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
-        if(ht_items==NULL)
+        if (ht_items == NULL)
             continue;
         it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
         ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
-        if(ht_items==NULL)
+        if (ht_items == NULL)
             continue;
         it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
         if (similar)
         {
-
             similar_items(it1, it2);
         }
         else
@@ -373,7 +371,7 @@ void del_visited_lists_ht(Pointer value)
 
 void print_all(HashTable ht, FILE *output_file)
 {
-    visited_lists = new hashtable(200,del_visited_lists_ht, hashfunction);
+    visited_lists = new hashtable(200, del_visited_lists_ht, hashfunction);
     output = output_file;
     List hts = ht->return_list();
     ListNode tempNode = hts->list_first();
@@ -399,12 +397,12 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
     List idf_l = idf->return_ht_nodes();
     ListNode ht_l_node = ht_l->list_first();
     ListNode l_node = idf_l->list_first();
-    int c=1;
+    int c = 1;
     while (l_node != NULL)
     {
-        if((*(int*)(((HashTable_Node)(l_node->value))->value)) <2)
+        if ((*(int *)(((HashTable_Node)(l_node->value))->value)) < 2)
         {
-            printf("%d\n",c++);
+            printf("%d\n", c++);
             idf->remove((((HashTable_Node)(l_node->value))->key));
         }
         l_node = l_node->next;
@@ -419,23 +417,23 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
             item *it = (item *)(ht_ll_node->value);
             if (!flag)
             {
-                int *bow = new int[idf->ht_size()];
-                it->set_tables(bow, NULL);
+                float *bow = new float[idf->ht_size()]();
+                it->set_table(bow);
                 List words_list = it->get_words_ht()->return_ht_nodes();
                 l_node = words_list->list_first();
                 while (l_node != NULL)
                 {
                     int *tmp = (int *)idf->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
                     if (tmp != NULL)
-                        bow[tmp[0]] = tmp[1];
+                        bow[tmp[0]] = tmp[1] * 1.0;
 
                     l_node = l_node->next;
                 }
             }
             else
             {
-                float *tfidf = new float[idf->ht_size()];
-                it->set_tables(NULL, tfidf);
+                float *tfidf = new float[idf->ht_size()]();
+                it->set_table(tfidf);
                 List words_list = it->get_words_ht()->return_ht_nodes();
                 l_node = words_list->list_first();
                 while (l_node != NULL)
@@ -452,4 +450,108 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
         }
         ht_l_node = ht_l_node->next;
     }
+}
+
+int lines_counter(const char *filename)
+{
+    FILE *fp;
+    int count = 0;
+    char c;
+
+    fp = fopen(filename, "r");
+
+    if (fp == NULL)
+        return 0;
+
+    for (c = getc(fp); c != EOF; c = getc(fp))
+        if (c == '\n')
+            count = count + 1;
+
+    fclose(fp);
+
+    return count;
+}
+
+float *train(string filename, HashTable ht, HashTable idf, int reps)
+{
+    HashTable ht_items;
+    item *it1, *it2;
+    string name1, name2, line;
+    int num1, num2, similar, comma1, comma2, slash1, slash2;
+    int i, counter;
+    float a = 0.01;
+    float e = 2.71;
+    float p, pred, err, best_err;
+    float x[idf->ht_size()];
+    float B[idf->ht_size() + 1] = {0.0};
+    float *best_B = new float[idf->ht_size() + 1]();
+    int file_lines = lines_counter(filename.c_str());
+    err = 10000000.0;
+    for (i = 0; i < reps; i++)
+    {
+        counter = 0;
+        size_t buffer_size = 0;
+        char *buffer = NULL;
+        FILE *stream = fopen(filename.c_str(), "r");
+        if (!stream)
+        {
+            printf("Error reading file: %s\n", filename.c_str());
+            return NULL;
+        }
+        getline(&buffer, &buffer_size, stream);
+        while ((getline(&buffer, &buffer_size, stream) != -1) && counter < (file_lines * (2 / 3)))
+        {
+            line = buffer;
+            slash1 = line.find("//");
+            comma1 = line.find(',', slash1);
+            slash2 = line.find("//", comma1);
+            comma2 = line.find(',', slash2);
+
+            name1 = line.substr(0, slash1);
+            num1 = stoi(line.substr(slash1 + 2, comma1 - slash1 + 2));
+            name2 = line.substr(comma1 + 1, slash2 - comma1 + 1 - 2);
+            num2 = stoi(line.substr(slash2 + 2, comma2 - slash2 + 2));
+            similar = stoi(line.substr(comma2 + 1));
+
+            // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
+
+            ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
+            if (ht_items == NULL)
+                continue;
+            it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
+            ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
+            if (ht_items == NULL)
+                continue;
+            it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
+
+            /* merge tables */
+            for (int j = 0; j < idf->ht_size(); j++)
+                x[j] = it1->get_bow_tfidf()[i] + it2->get_bow_tfidf()[i]; /////////////////////////// other function later
+
+            p = B[0];
+            for (int j = 1; j <= idf->ht_size(); j++)
+                p += B[j] * x[j - 1];
+            pred = 1 / (1 + pow(e, p));
+            err = abs(similar - pred); ///////////////////////////////////// other error function later
+
+            if (err < best_err)
+                best_B[0] = B[0];
+            B[0] = B[0] - (a * err * pred * (1 - pred));
+            for (int j = 1; j <= idf->ht_size(); j++)
+            {
+                if (err < best_err)
+                    best_B[j] = B[j];
+                B[j] = B[j] - (a * err * pred * (1 - pred) * x[j - 1]);
+            }
+            if (err < best_err)
+            {
+                best_err = err;
+            }
+
+            counter++;
+        }
+        free(buffer);
+        fclose(stream);
+    }
+    return best_B;
 }

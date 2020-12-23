@@ -1,26 +1,6 @@
 #include <acutest.h>
 #include "functions.h"
 
-int lines_counter(const char *filename)
-{
-    FILE *fp; 
-    int count = 0;
-    char c;
-
-    fp = fopen(filename, "r"); 
-  
-    if (fp == NULL) 
-        return 0; 
-  
-    for (c = getc(fp); c != EOF; c = getc(fp)) 
-        if (c == '\n')
-            count = count + 1; 
-  
-    fclose(fp); 
-
-    return count; 
-}
-
 void test_medium(void)
 {
     HashTable HT = new hashtable(10,del_main_ht, hashfunction);
