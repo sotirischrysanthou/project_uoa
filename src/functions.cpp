@@ -433,17 +433,18 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
             else
             {
                 float *tfidf = new float[idf->ht_size()]();
-                it->set_table(tfidf);
                 List words_list = it->get_words_ht()->return_ht_nodes();
                 l_node = words_list->list_first();
                 while (l_node != NULL)
                 {
                     int *tmp = (int *)idf->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
                     if (tmp != NULL)
-                        tfidf[tmp[0]] = (((tmp[1]) * 1.0) / it->get_words_ht()->ht_size()) * log((item_count * 1.0) / (*(int *)(((HashTable_Node)(l_node->value))->value)));
-
+                    {
+                        tfidf[tmp[0]] = (((tmp[1]) * 1.0) / (it->get_words_ht()->ht_size() * 1.0)) * log((item_count * 1.0) / ((*(int *)(((HashTable_Node)(l_node->value))->value)) * 1.0));
+                    }
                     l_node = l_node->next;
                 }
+                it->set_table(tfidf);
             }
 
             ht_ll_node = ht_ll_node->next;
@@ -486,7 +487,7 @@ float *train(string filename, HashTable ht, HashTable idf, int reps)
     float B[idf->ht_size() + 1] = {0.0};
     float *best_B = new float[idf->ht_size() + 1]();
     int file_lines = lines_counter(filename.c_str());
-    err = 10000000.0;
+    best_err = 10000000.0;
     for (i = 0; i < reps; i++)
     {
         counter = 0;
@@ -499,7 +500,7 @@ float *train(string filename, HashTable ht, HashTable idf, int reps)
             return NULL;
         }
         getline(&buffer, &buffer_size, stream);
-        while ((getline(&buffer, &buffer_size, stream) != -1) && counter < (file_lines * (2 / 3)))
+        while ((getline(&buffer, &buffer_size, stream) != -1) && counter < (file_lines / 3 * 2))
         {
             line = buffer;
             slash1 = line.find("//");
@@ -526,32 +527,42 @@ float *train(string filename, HashTable ht, HashTable idf, int reps)
 
             /* merge tables */
             for (int j = 0; j < idf->ht_size(); j++)
-                x[j] = it1->get_bow_tfidf()[i] + it2->get_bow_tfidf()[i]; /////////////////////////// other function later
-
-            p = B[0];
-            for (int j = 1; j <= idf->ht_size(); j++)
-                p += B[j] * x[j - 1];
-            pred = 1 / (1 + pow(e, p));
-            err = abs(similar - pred); ///////////////////////////////////// other error function later
-
-            if (err < best_err)
-                best_B[0] = B[0];
-            B[0] = B[0] - (a * err * pred * (1 - pred));
-            for (int j = 1; j <= idf->ht_size(); j++)
             {
-                if (err < best_err)
-                    best_B[j] = B[j];
-                B[j] = B[j] - (a * err * pred * (1 - pred) * x[j - 1]);
+                x[j] = it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]; /////////////////////////// other function later
             }
-            if (err < best_err)
-            {
-                best_err = err;
-            }
+                p = B[0];
+                for (int j = 1; j <= idf->ht_size(); j++)
+                    p += B[j] * x[j - 1];
+                pred = 1.0 / (1.0 + pow(e, p));
+                err = -similar*1.0*log(pred) - (1-similar*1.0)*log(1-pred); ///////////////////////////////////// other error function later
 
-            counter++;
+                if (abs(err) <= abs(best_err))
+                    best_B[0] = B[0];
+                B[0] = B[0] - (a * err * pred * (1 - pred));
+                for (int j = 1; j <= idf->ht_size(); j++)
+                {
+                    if (abs(err) <= abs(best_err))
+                    {
+                        best_B[j] = B[j];
+                    }
+                    B[j] = B[j] - (a * err * pred * (1.0 - pred) * x[j - 1]);
+                }
+                if (abs(err) <= abs(best_err))
+                {
+                    printf("%f\n", err);
+                    best_err = err;
+                }
+
+                counter++;
         }
         free(buffer);
         fclose(stream);
     }
+    FILE *B_best = fopen("./best_B", "w");
+    for (i = 0; i < idf->ht_size() + 1; i++)
+    {
+        fprintf(B_best, "%f\n", best_B[i]);
+    }
+
     return best_B;
 }

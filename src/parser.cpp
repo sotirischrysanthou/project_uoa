@@ -116,10 +116,10 @@ int end_of_string()
 {
     for (; file_con[ch] != '\"'; ch++)
     {
-        if(file_con[ch]=='.'||file_con[ch]==','||file_con[ch]==';'||file_con[ch]=='?'||file_con[ch]=='\''||file_con[ch]=='('||file_con[ch]==')')
-            file_con[ch]=' ';
-        else if (file_con[ch]>='A'&&file_con[ch]<='Z')
-            file_con[ch]=file_con[ch]-('A'-'a');
+        if (file_con[ch] == '.' || file_con[ch] == ',' || file_con[ch] == ';' || file_con[ch] == '?' || file_con[ch] == '\'' || file_con[ch] == '(' || file_con[ch] == ')')
+            file_con[ch] = ' ';
+        else if (file_con[ch] >= 'A' && file_con[ch] <= 'Z')
+            file_con[ch] = file_con[ch] - ('A' - 'a');
         if (file_con[ch] == '\n')
             return 1;
     }
@@ -157,18 +157,18 @@ void tf_ifd_hts_insert(int begin, int end)
     int *counter = NULL;
     for (int i = begin; i <= end; i++)
     {
-        if(isdigit(file_con[begin_of_word]))
+        if (isdigit(file_con[begin_of_word]))
         {
-            if(file_con[i] == ' ')
-                begin_of_word=i+1;
+            if (file_con[i] == ' ')
+                begin_of_word = i + 1;
         }
 
         else if (file_con[i] == ' ' || file_con[i] == '\"')
         {
             end_of_word = i;
-            if(end_of_word-begin_of_word<3)
+            if (end_of_word - begin_of_word < 3)
             {
-                begin_of_word=i+1;
+                begin_of_word = i + 1;
                 continue;
             }
             word = new string(file_con.substr(begin_of_word, end_of_word - begin_of_word));
@@ -182,22 +182,23 @@ void tf_ifd_hts_insert(int begin, int end)
                 ht_n->key = word;
                 ht_n->value = counter;
                 tf_ht->insert(ht_n);
-
-                counter = (int *)idf_ht->search(word, cmp_hashtable_search);
-                if (counter)
-                    counter[1]++;
-                else
-                {
-                    counter = new int[2];
-                    counter[0]=idf_ht->ht_size();
-                    counter[1]=1;
-                    ht_n = new hashtable_node;
-                    ht_n->key = word;
-                    ht_n->value = counter;
-                    idf_ht->insert(ht_n);
-                }
+                    counter = (int *)idf_ht->search(word, cmp_hashtable_search);
+                    if (counter)
+                        counter[1]++;
+                    else
+                    {
+                        counter = new int[2];
+                        counter[0] = idf_ht->ht_size();
+                        counter[1] = 1;
+                        
+                        ht_n = new hashtable_node;
+                        ht_n->key = word;
+                        ht_n->value = counter;
+                        idf_ht->insert(ht_n);
+                    }
+                
             }
-            begin_of_word=i+1;
+            begin_of_word = i + 1;
         }
     }
 }
@@ -215,10 +216,8 @@ string get_string(bool flag)
     end = ch;
     ch++;
 
-
-    if(flag&&tf_ht&&idf_ht)
+    if (flag && tf_ht && idf_ht)
         tf_ifd_hts_insert(begin, end);
-    
 
     return file_con.substr(begin, end - begin);
 }
