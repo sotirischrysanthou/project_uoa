@@ -278,18 +278,18 @@ int read_all_folders(string dir_name, HashTable ht, HashTable idf_ht)
     }
     while ((de = readdir(dr)) != NULL)
     {
-        struct timeval t1, t2;
-        double elapsedTime;
-        gettimeofday(&t1, NULL);
+        // struct timeval t1, t2;
+        // double elapsedTime;
+        // gettimeofday(&t1, NULL);
 
         if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
         count += read_files(dir_name, de->d_name, ht, idf_ht);
 
-        gettimeofday(&t2, NULL);
-        elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
-        elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
-        printf("%f s. for %s\n", elapsedTime, de->d_name);
+        // gettimeofday(&t2, NULL);
+        // elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
+        // elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
+        // printf("%f s. for %s\n", elapsedTime, de->d_name);
     }
 
     closedir(dr);
@@ -397,16 +397,24 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
     List idf_l = idf->return_ht_nodes();
     ListNode ht_l_node = ht_l->list_first();
     ListNode l_node = idf_l->list_first();
-    int c = 1;
+    int c = 0;
     while (l_node != NULL)
     {
-        if ((*(int *)(((HashTable_Node)(l_node->value))->value)) < 2)
+        /*                                          single-document words                                                          low IDFs   */
+        if ((((int *)(((HashTable_Node)(l_node->value))->value))[1] < 2) || ((((int *)(((HashTable_Node)(l_node->value))->value))[1] > item_count / 10)))
         {
-            printf("%d\n", c++);
+            // printf("%d\n", c++);
             idf->remove((((HashTable_Node)(l_node->value))->key));
         }
+        else
+        {
+            ((int *)(((HashTable_Node)(l_node->value))->value))[0] = c;
+            c++;
+        }
+
         l_node = l_node->next;
     }
+    printf("items = %d , idf size = %d\n", item_count, idf->ht_size());
 
     while (ht_l_node != NULL)
     {
@@ -417,7 +425,7 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
             item *it = (item *)(ht_ll_node->value);
             if (!flag)
             {
-                float *bow = new float[idf->ht_size()]();
+                double *bow = new double[idf->ht_size()]();
                 it->set_table(bow);
                 List words_list = it->get_words_ht()->return_ht_nodes();
                 l_node = words_list->list_first();
@@ -432,7 +440,7 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
             }
             else
             {
-                float *tfidf = new float[idf->ht_size()]();
+                double *tfidf = new double[idf->ht_size()]();
                 List words_list = it->get_words_ht()->return_ht_nodes();
                 l_node = words_list->list_first();
                 while (l_node != NULL)
@@ -440,7 +448,7 @@ void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
                     int *tmp = (int *)idf->search((((HashTable_Node)(l_node->value))->key), cmp_hashtable_search);
                     if (tmp != NULL)
                     {
-                        tfidf[tmp[0]] = (((tmp[1]) * 1.0) / (it->get_words_ht()->ht_size() * 1.0)) * log((item_count * 1.0) / ((*(int *)(((HashTable_Node)(l_node->value))->value)) * 1.0));
+                        tfidf[tmp[0]] = ((*((int *)(((HashTable_Node)(l_node->value))->value)) * 1.0) / (it->get_words_ht()->ht_size() * 1.0)) * log((item_count * 1.0) / ((tmp[1]) * 1.0));
                     }
                     l_node = l_node->next;
                 }
@@ -473,20 +481,22 @@ int lines_counter(const char *filename)
     return count;
 }
 
-float *train(string filename, HashTable ht, HashTable idf, int reps)
+double *train(string filename, HashTable ht, HashTable idf, int reps)
 {
     HashTable ht_items;
     item *it1, *it2;
     string name1, name2, line;
     int num1, num2, similar, comma1, comma2, slash1, slash2;
     int i, counter;
-    float a = 0.01;
-    float e = 2.71;
-    float p, pred, err, best_err;
-    float x[idf->ht_size()];
-    float B[idf->ht_size() + 1] = {0.0};
-    float *best_B = new float[idf->ht_size() + 1]();
-    int file_lines = lines_counter(filename.c_str());
+    double a = 0.01;
+    double e = 2.71;
+    double b = 0.0;
+    double f, sigma, err, best_err;
+    double dj[idf->ht_size()];
+    double x[idf->ht_size()];
+    double W[idf->ht_size()] = {0.0};
+    double new_W[idf->ht_size()] = {0.0};
+    double *best_W = new double[idf->ht_size() + 1]();
     best_err = 10000000.0;
     for (i = 0; i < reps; i++)
     {
@@ -500,7 +510,7 @@ float *train(string filename, HashTable ht, HashTable idf, int reps)
             return NULL;
         }
         getline(&buffer, &buffer_size, stream);
-        while ((getline(&buffer, &buffer_size, stream) != -1) && counter < (file_lines / 3 * 2))
+        while ((getline(&buffer, &buffer_size, stream) != -1))
         {
             line = buffer;
             slash1 = line.find("//");
@@ -526,43 +536,125 @@ float *train(string filename, HashTable ht, HashTable idf, int reps)
             it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
 
             /* merge tables */
+
             for (int j = 0; j < idf->ht_size(); j++)
             {
-                x[j] = it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]; /////////////////////////// other function later
+                x[j] = abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]);
             }
-                p = B[0];
-                for (int j = 1; j <= idf->ht_size(); j++)
-                    p += B[j] * x[j - 1];
-                pred = 1.0 / (1.0 + pow(e, p));
-                err = -similar*1.0*log(pred) - (1-similar*1.0)*log(1-pred); ///////////////////////////////////// other error function later
-
-                if (abs(err) <= abs(best_err))
-                    best_B[0] = B[0];
-                B[0] = B[0] - (a * err * pred * (1 - pred));
-                for (int j = 1; j <= idf->ht_size(); j++)
+            f = b;
+            for (int j = 0; j < idf->ht_size(); j++)
+            {
+                f += W[j] * x[j];
+            }
+            // printf("f= %f\n", f);
+            // getchar();
+            f = f / (1.0 * idf->ht_size());
+            sigma = 1.0 / (1.0 + pow(e, f));
+            err = -similar * 1.0 * log(sigma) - (1.0 - similar * 1.0) * log(1.0 - sigma); ///////////////////////////////////// other error function later
+            for (int j = 0; j < idf->ht_size(); j++)
+            {
+                dj[j] = (sigma - similar) * x[j];
+                new_W[j] = W[j] - a * dj[j];
+                if ((new_W[j] - W[j]) > 0.00001)
                 {
-                    if (abs(err) <= abs(best_err))
-                    {
-                        best_B[j] = B[j];
-                    }
-                    B[j] = B[j] - (a * err * pred * (1.0 - pred) * x[j - 1]);
+                    W[j] = new_W[j];
+                    // printf("%d -- W[%d] changed\n", counter, j);
                 }
-                if (abs(err) <= abs(best_err))
+                else
                 {
-                    printf("%f\n", err);
-                    best_err = err;
+                    best_W[j] = W[j];
+                    // printf("%d -- W[%d] is best\n", counter, j);
                 }
+            }
+            if (sigma)
+                // printf("%d -- %.50f\n", counter, sigma);
+                // sleep(1);
+                // if (abs(err) <= abs(best_err))
+                //     best_W[0] = W[0];
+                // W[0] = W[0] - (a * err * sigma * (1 - sigma));
+                // for (int j = 1; j <= idf->ht_size(); j++)
+                // {
+                //     if (abs(err) <= abs(best_err))
+                //     {
+                //         best_W[j] = W[j];
+                //     }
+                //     W[j] = W[j] - (a * err * sigma * (1.0 - sigma) * x[j - 1]);
+                //     printf("W[%d]=%f\n",j, W[j]);
+                // }
+                // if (abs(err) <= abs(best_err))
+                // {
+                //     best_err = err;
+                // }
 
                 counter++;
+            // getchar();
         }
         free(buffer);
         fclose(stream);
     }
-    FILE *B_best = fopen("./best_B", "w");
+    FILE *W_best = fopen("./best_W", "w");
     for (i = 0; i < idf->ht_size() + 1; i++)
     {
-        fprintf(B_best, "%f\n", best_B[i]);
+        fprintf(W_best, "%f\n", best_W[i]);
     }
 
-    return best_B;
+    return best_W;
+}
+
+void test(string filename, HashTable ht, double *W, int idf_size)
+{
+    int score = 0;
+    int total=0;
+    double e = 3.17;
+    double sum, res;
+    HashTable ht_items;
+    item *it1, *it2;
+    string name1, name2, line;
+    int num1, num2, similar, comma1, comma2, slash1, slash2;
+    size_t buffer_size = 0;
+    char *buffer = NULL;
+    FILE *stream = fopen(filename.c_str(), "r");
+    if (!stream)
+    {
+        printf("Error reading file: %s\n", filename.c_str());
+        return;
+    }
+    getline(&buffer, &buffer_size, stream);
+    while (getline(&buffer, &buffer_size, stream) != -1)
+    {
+        line = buffer;
+        slash1 = line.find("//");
+        comma1 = line.find(',', slash1);
+        slash2 = line.find("//", comma1);
+        comma2 = line.find(',', slash2);
+
+        name1 = line.substr(0, slash1);
+        num1 = stoi(line.substr(slash1 + 2, comma1 - slash1 + 2));
+        name2 = line.substr(comma1 + 1, slash2 - comma1 + 1 - 2);
+        num2 = stoi(line.substr(slash2 + 2, comma2 - slash2 + 2));
+        similar = stoi(line.substr(comma2 + 1));
+
+        // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
+
+        ht_items = (HashTable)ht->search(&name1, cmp_hashtable_search);
+        if (ht_items == NULL)
+            continue;
+        it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
+        ht_items = (HashTable)ht->search(&name2, cmp_hashtable_search);
+        if (ht_items == NULL)
+            continue;
+        it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
+
+        sum = 0;
+        for (int j = 0; j < idf_size; j++)
+        {
+            sum += abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]) * W[j];
+        }
+        res = 1.0 / (1.0 + pow(e, sum));
+        if((res>0.4&&similar==1) || (res<=0.4&&similar==0))
+            score++;
+        total++;
+        printf("sum = %f, res = %f, similar = %d\n",sum, res, similar);
+    }
+        printf("score %d/%d\n",score, total);
 }

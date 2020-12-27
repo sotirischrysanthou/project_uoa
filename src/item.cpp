@@ -75,12 +75,12 @@ HashTable item::get_words_ht()
     return words;
 }
 
-void item::set_table(float* table)
+void item::set_table(double* table)
 {
     array=table;
 }
 
-float * item::get_bow_tfidf()
+double * item::get_bow_tfidf()
 {
     return array;
 }
