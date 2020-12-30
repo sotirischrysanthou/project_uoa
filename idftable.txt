@@ -1,2 +1,0 @@
-camera 0
-skata 1
