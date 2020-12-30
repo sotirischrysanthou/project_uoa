@@ -510,7 +510,7 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
     string name1, name2, line;
     int num1, num2, similar, comma1, comma2, slash1, slash2;
     int i, counter;
-    double a = 0.001;
+    double a = 0.5;
     double e = 2.71;
     double b = 0.0;
     double f, sigma, err, best_err, new_b, best_b = 0.0;
@@ -697,25 +697,35 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         if (similar == 1)
         {
             t1++;
-            if (res > 0.06)
+            if (res > 0.2)
             {
                 s1++;
                 score++;
             }
+            else
+            {
+                printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+            }
+            
         }
         else if (similar == 0)
         {
             t0++;
-            if (res <= 0.06)
+            if (res <= 0.2)
             {
                 s0++;
                 score++;
             }
+            else
+            {
+                printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+            }
+            
         }
         total++;
 
         // if (similar)
-        printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+        // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
     }
     if (validation)
         printf("validation score %d/%d\n", score, total);
