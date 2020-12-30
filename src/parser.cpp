@@ -468,6 +468,7 @@ void print_table(List l);
 
 void print_pair(List l)
 {
+    printf("~~~~PAIR~~~~\n");
     j_pair *jpair;
     ListNode lnode = l->list_first();
     while (lnode != NULL)
@@ -501,6 +502,7 @@ void print_pair(List l)
 
 void print_table(List l)
 {
+    printf("~~~~TABLE~~~~\n");
     json_table_node *table;
     ListNode lnode = l->list_first();
     while (lnode != NULL)
@@ -530,4 +532,9 @@ void print_table(List l)
 
         lnode = l->list_next(lnode);
     }
+}
+
+void print_json(List l)
+{
+    print_pair(l);
 }

@@ -28,6 +28,7 @@ hashtable::~hashtable()
     {
         delete table[i];
     }
+    delete[] table;
 }
 
 Pointer hashtable::search(Pointer key, CompareFunc compare)

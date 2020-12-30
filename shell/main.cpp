@@ -52,13 +52,12 @@ int main(int argc, char const *argv[])
     /* split csv */
     string line;
     int file_lines = lines_counter(csv_file.c_str());
-    printf("%d\n\n\n", file_lines);
+    printf("csv file lines: %d\n", file_lines);
     int counter = 0;
     size_t buffer_size = 0;
     char *buffer = NULL;
     FILE *stream = fopen(csv_file.c_str(), "r");
     FILE *train_f = fopen("train.csv", "w");
-    FILE *validation_f = fopen("validation.csv", "w");
     FILE *test_f = fopen("test.csv", "w");
 
     if (!stream)
@@ -69,29 +68,25 @@ int main(int argc, char const *argv[])
     getline(&buffer, &buffer_size, stream);
     line = buffer;
     fprintf(train_f,"%s",line.c_str());
-    fprintf(validation_f,"%s",line.c_str());
     fprintf(test_f,"%s",line.c_str());
     while ((getline(&buffer, &buffer_size, stream) != -1))
     {
         line = buffer;
-        if(counter<(file_lines*6/10))
+        if(counter<(file_lines*8/10))
             fprintf(train_f,"%s",line.c_str());
-        else if(counter<(file_lines*8/10))
-            fprintf(validation_f,"%s",line.c_str());
         else
             fprintf(test_f,"%s",line.c_str());
         counter++;
     }
 
     fclose(train_f);
-    fclose(validation_f);
     fclose(test_f);
 
     printf("---------------------\n");
 
     gettimeofday(&t1, NULL); // start timer
 
-    double *b = train("train.csv", HT, tf_idf);
+    double *b = train("train.csv", HT, tf_idf, 20);
 
     gettimeofday(&t2, NULL);                              // stop timer
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
@@ -101,6 +96,12 @@ int main(int argc, char const *argv[])
     gettimeofday(&t1, NULL); // start timer
 
     test("train.csv", HT, b, tf_idf->ht_size());
+
+    gettimeofday(&t2, NULL);                              // stop timer
+    elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
+    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
+    printf("%f s. for validation/test\n", elapsedTime);
+    gettimeofday(&t1, NULL); // start timer
 
     if (argc > 4)
     {

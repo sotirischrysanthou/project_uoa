@@ -22,7 +22,7 @@ class item
     connections common_and_uncommon;
     List specs; /* a list of all of the item's specs, parsed from the json file */
     HashTable words;
-     double  *array;
+    double  *array;
 
 public:
     item(string fldr, int i);

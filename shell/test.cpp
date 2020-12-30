@@ -36,9 +36,17 @@ void test_large(void)
     delete HT;
     c++;
 }
+void test_parse(void)
+{
+    List res;
+    printf("Printing buy.net/4266.json in parsed form. Open file to check content.\n");
+    res = parse("./data/2013_camera_specs/buy.net/4266.json");
+    print_json(res);
+}
 
 TEST_LIST = {
    { "test_medium", test_medium },
    { "test_large", test_large },
+   { "test_parse", test_parse },
    { NULL, NULL }
 };

@@ -23,10 +23,12 @@ void read_csv(string filename, HashTable ht);
 void print_all(HashTable ht,FILE *output_file=stdout);
 /* set the values for BoW (0) or Tf-Idf (1) */
 void set_Bow_or_TfIdf(HashTable ht, HashTable tfidf, int Item_count, bool flag);
-
+/* destroy function */
 void del_main_ht(Pointer value);
-
+/* count and return the number of lines in a file */
 int lines_counter(const char *filename);
-double  *train(string filename, HashTable ht, HashTable idf, int reps=1);
-void test(string filename, HashTable ht, double *W, int idf_size);
+/* training function using "filename" as the training csv. repetitions have 1 as default */
+double *train(string filename, HashTable ht, HashTable idf, int reps=1);
+/* testing function */
+void test(string filename, HashTable ht, double *W, int idf_size, bool validation=0);
 

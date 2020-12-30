@@ -53,7 +53,7 @@ void list::list_insert_next(ListNode node, Pointer value)
 		node = dummy;
 	}
 	// Creation of new node
-	ListNode new_node = new list_node;;
+	ListNode new_node = new list_node;
 	new_node->value = value;
 
 	new_node->next = node->next;

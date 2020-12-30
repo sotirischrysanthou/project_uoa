@@ -38,5 +38,5 @@ json_table_node *json_table();
 List create_jTable();
 /* parse the file and insert all specs into list that is returned */
 List parse(string filename, HashTable returned_tf=NULL, HashTable receved_idf=NULL);
-
+void print_json(List l);
 #endif
