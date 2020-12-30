@@ -37,4 +37,7 @@ clean:
 clear_out:
 	rm -f output*
 
+clear_all:
+	rm -f train.csv test.csv best_W
+
 .PHONY: all clean
