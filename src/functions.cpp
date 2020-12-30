@@ -404,13 +404,7 @@ void print_all(HashTable ht, FILE *output_file)
         delete items_list;
     }
     delete hts;
-<<<<<<< HEAD
     delete visited_lists;
-=======
-    // printf("%d--------------------------------------------------------\n", visited_lists->ht_size());
-    delete visited_lists;
-    // printf("%d--------------------------------------------------------\n", visited_uncommon->ht_size());
->>>>>>> 9a8590f5e3a63bd87b5d0c8478e5034f20d725ca
     delete visited_uncommon;
 }
 
@@ -713,9 +707,6 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         // if (similar)
         // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
     }
-<<<<<<< HEAD
-    printf("total score:\t%d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
-=======
     
     printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
 }
@@ -733,5 +724,4 @@ int findYourArg(int argc, const char *argv[], char what[3])
         }
     }
     return 0;
->>>>>>> 9a8590f5e3a63bd87b5d0c8478e5034f20d725ca
 }
