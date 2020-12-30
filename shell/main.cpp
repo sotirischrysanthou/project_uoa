@@ -85,7 +85,6 @@ int main(int argc, char const *argv[])
     fclose(test_f);
     fclose(stream);
 
-    printf("---------------------\n");
     bool train_flag = 1, test_flag = 1;
     if (argc > 4)
     {
@@ -103,7 +102,9 @@ int main(int argc, char const *argv[])
     {
         gettimeofday(&t1, NULL); // start timer
 
-        b = train("train.csv", HT, tf_idf, 10);
+        b = train("train.csv", HT, tf_idf, 5);
+        /*  for medium: ~1.30m
+            for large:  ~9m      */
 
         gettimeofday(&t2, NULL);                              // stop timer
         elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
@@ -134,7 +135,11 @@ int main(int argc, char const *argv[])
     {
         gettimeofday(&t1, NULL); // start timer
 
-        test("test.csv", HT, b, tf_idf->ht_size());
+        printf("----------test----------\n");
+
+        test("train.csv", HT, b, tf_idf->ht_size());
+
+        printf("------------------------\n");
 
         gettimeofday(&t2, NULL);                              // stop timer
         elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
@@ -142,7 +147,7 @@ int main(int argc, char const *argv[])
         printf("%f s. for validation/test\n", elapsedTime);
         gettimeofday(&t1, NULL); // start timer
     }
-    
+
     delete b;
 
     if (argc > 5)
@@ -155,6 +160,7 @@ int main(int argc, char const *argv[])
         print_all(HT);
 
     delete HT;
+    delete tf_idf;
 
     gettimeofday(&t2, NULL);                              // stop timer
     elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms

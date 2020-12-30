@@ -404,9 +404,7 @@ void print_all(HashTable ht, FILE *output_file)
         delete items_list;
     }
     delete hts;
-    printf("%d--------------------------------------------------------\n", visited_lists->ht_size());
     delete visited_lists;
-    printf("%d--------------------------------------------------------\n", visited_uncommon->ht_size());
     delete visited_uncommon;
 }
 
@@ -563,6 +561,7 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
             for (int j = 0; j < idf->ht_size(); j++)
             {
                 x[j] = abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]);
+                // x[j] = (it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]) / 2;
             }
             f = b;
             for (int j = 0; j < idf->ht_size(); j++)
@@ -690,6 +689,8 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         for (int j = 0; j < idf_size; j++)
         {
             sum += abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]) * W[j];
+            // sum += (it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]) / 2 * W[j];
+
             // printf("%f - %f - %f\n",it1->get_bow_tfidf()[j] , it2->get_bow_tfidf()[j], W[j]);
             // getchar();
         }
@@ -697,28 +698,28 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         if (similar == 1)
         {
             t1++;
-            if (res > 0.2)
+            if (res > 0.01)
             {
                 s1++;
                 score++;
             }
             else
             {
-                printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
             }
             
         }
         else if (similar == 0)
         {
             t0++;
-            if (res <= 0.2)
+            if (res <= 0.01)
             {
                 s0++;
                 score++;
             }
             else
             {
-                printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
             }
             
         }
@@ -727,8 +728,5 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         // if (similar)
         // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
     }
-    if (validation)
-        printf("validation score %d/%d\n", score, total);
-    else
-        printf("total score:\t%d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
+    printf("total score:\t%d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
 }
