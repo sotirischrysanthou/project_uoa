@@ -404,9 +404,9 @@ void print_all(HashTable ht, FILE *output_file)
         delete items_list;
     }
     delete hts;
-    printf("%d--------------------------------------------------------\n", visited_lists->ht_size());
+    // printf("%d--------------------------------------------------------\n", visited_lists->ht_size());
     delete visited_lists;
-    printf("%d--------------------------------------------------------\n", visited_uncommon->ht_size());
+    // printf("%d--------------------------------------------------------\n", visited_uncommon->ht_size());
     delete visited_uncommon;
 }
 
@@ -513,14 +513,14 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
     double a = 0.5;
     double e = 2.71;
     double b = 0.0;
-    double f, sigma, err, best_err, new_b, best_b = 0.0;
+    double f, sigma, new_b;
     double dj[idf->ht_size()];
     double x[idf->ht_size()];
     double W[idf->ht_size()] = {0.0};
     double new_W[idf->ht_size()] = {0.0};
+    /* last position of the best weights array is the best b */
     double *best_W = new double[idf->ht_size() + 1]();
-    // best_W[idf->ht_size()]=0.0;
-    best_err = 10000000.0;
+    
     for (i = 0; i < reps; i++)
     {
         counter = 0;
@@ -569,16 +569,12 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
             {
                 f += W[j] * x[j];
             }
-            // printf("f= %f\n", f);
-            // getchar();
-            // f = f / (1.0 * idf->ht_size());
+
             sigma = 1.0 / (1.0 + pow(e, (-1.0) * f));
-            // printf("sigma %f  -f %f\n",sigma,(-1.0)*f);getchar();
-            err = -similar * 1.0 * log(sigma) - (1.0 - similar * 1.0) * log(1.0 - sigma); ///////////////////////////////////// other error function later
+            // printf("sigma %f  -f %f\n",sigma,(-1.0)*f); getchar();
 
             new_b = b - a * (sigma - similar);
             if ((new_b - b) > 0.00001)
-            // if(b<=best_W[idf->ht_size()])
             {
                 b = new_b;
             }
@@ -595,7 +591,6 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
                 dj[j] = (sigma - similar) * x[j];
                 new_W[j] = W[j] - a * dj[j];
                 if ((new_W[j] - W[j]) > 0.00001)
-                // if(W[j]<=best_W[j])
                 {
                     W[j] = new_W[j];
                     // printf("%d -- W[%d] changed\n", counter, j);
@@ -608,23 +603,6 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
                 }
             }
 
-            // if (abs(err) <= abs(best_err))
-            //     best_b = b;
-
-            // b = b - (a * err * sigma * (1 - sigma));
-            // for (int j = 0; j < idf->ht_size(); j++)
-            // {
-            //     if (abs(err) <= abs(best_err))
-            //     {
-            //         best_W[j] = W[j];
-            //     }
-            //     W[j] = W[j] - (a * err * sigma * (1.0 - sigma) * x[j]);
-            //     // printf("W[%d]=%f\n", j, W[j]);
-            // }
-            // if (abs(err) <= abs(best_err))
-            // {
-            //     best_err = err;
-            // }
 
             counter++;
             // getchar();
@@ -632,8 +610,8 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
         free(buffer);
         fclose(stream);
     }
+    /* write best weights and b into a file */
     FILE *W_best = fopen("./best_W", "w");
-    // fprintf(W_best, "%f\n", best_b);
     for (i = 0; i <= idf->ht_size(); i++)
     {
         fprintf(W_best, "%f\n", best_W[i]);
@@ -704,7 +682,7 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
             }
             else
             {
-                printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
             }
             
         }
@@ -718,7 +696,7 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
             }
             else
             {
-                printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
             }
             
         }
@@ -727,8 +705,6 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         // if (similar)
         // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
     }
-    if (validation)
-        printf("validation score %d/%d\n", score, total);
-    else
-        printf("total score:\t%d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
+    
+    printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
 }
