@@ -672,6 +672,7 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
             // getchar();
         }
         res = 1.0 / (1.0 + pow(e, (-1.0) * sum));
+        /* after processing the results, the threshhold was decided at 0.2 */
         if (similar == 1)
         {
             t1++;

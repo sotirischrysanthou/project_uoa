@@ -6,7 +6,7 @@
 /*          ./exe ./data/2013_camera_specs ./data/sigmod_large_labelled_dataset.csv tfidf both output_file.txt */
 int main(int argc, char const *argv[])
 {
-    int part = 1;
+    int part = 2;
     string input_folder = argv[1];
     string csv_file = argv[2];
     bool bow_tfidf = 1;
@@ -111,6 +111,7 @@ int main(int argc, char const *argv[])
         {
             gettimeofday(&t1, NULL); // start timer
 
+            /* 10 iterations seemed to give the best results */
             b = train("train.csv", HT, IDF, 10);
 
             gettimeofday(&t2, NULL);                              // stop timer
@@ -151,11 +152,12 @@ int main(int argc, char const *argv[])
             elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
             elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
             printf("%f s. for validation/test\n", elapsedTime);
-            gettimeofday(&t1, NULL); // start timer
         }
 
         delete b;
     }
+
+    gettimeofday(&t1, NULL); // start timer
 
     if (argc > 5)
     {
