@@ -10,7 +10,8 @@ Data structures:
     The vocabulary is stored in a hashtable and each item contains an array of the same size with its tfidf or bow values. The correct position for each word is stored inside the vocabulary hashtable.
     Many structures were already implemented by us during that course and modified for satisfying this project's requirements.
 
-    ./exe -p 2 -d ./data/2013_camera_specs -c ./data/sigmod_large_labelled_dataset.csv -v tfidf -t both -o output_file.txt
+    Usage:
+    ./exe -p 2 -d ./data/2013_camera_specs -c ./data/sigmod_large_labelled_dataset.csv -v tfidf -t train -o output_file.txt
     -p  : which part to execute 1 or 2 (a default is set inside main)
     -d  : data folder
     -c  : csv file
