@@ -709,3 +709,18 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
     
     printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
 }
+
+int findYourArg(int argc, const char *argv[], char what[3])
+{
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], what) == 0)
+        {
+            if (argc >= i + 2)
+            {
+                return i + 1;
+            }
+        }
+    }
+    return 0;
+}

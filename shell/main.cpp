@@ -4,14 +4,18 @@
 
 /* usage:   ./exe input_folder(full) csv_file(full) "bow or tfidf"(default=tfidf) "train or test or both"(default=both) output_file(default=stdout) */
 /*          ./exe ./data/2013_camera_specs ./data/sigmod_large_labelled_dataset.csv tfidf both output_file.txt */
+/*          ./exe -p 2 -d ./data/2013_camera_specs -c ./data/sigmod_large_labelled_dataset.csv -v tfidf -t both -o output_file.txt */
+
 int main(int argc, char const *argv[])
 {
     int part = 2;
-    string input_folder = argv[1];
-    string csv_file = argv[2];
+    if(findYourArg(argc, argv, "-p")!=0)
+        part = atoi(argv[findYourArg(argc, argv, "-p")]);
+    string input_folder = argv[findYourArg(argc, argv, "-d")];
+    string csv_file = argv[findYourArg(argc, argv, "-c")];
     bool bow_tfidf = 1;
-    if (argc > 3)
-        if (strcmp(argv[3], "bow") == 0)
+    if (findYourArg(argc, argv, "-v")!=0)
+        if (strcmp(argv[findYourArg(argc, argv, "-v")], "bow") == 0)
             bow_tfidf = 0;
 
     struct timeval t1, t2;
@@ -93,17 +97,22 @@ int main(int argc, char const *argv[])
         fclose(stream);
 
         bool train_flag = 1, test_flag = 1; /* both training and testing are enabled as default */
-        if (argc > 4)
-        {
-            if (strcmp(argv[4], "train") == 0)
-            {
+        if (findYourArg(argc, argv, "-v")!=0)
+            if (strcmp(argv[findYourArg(argc, argv, "-t")], "train") == 0)
                 test_flag = 0;
-            }
-            else if (strcmp(argv[4], "test") == 0)
-            {
+            if (strcmp(argv[findYourArg(argc, argv, "-t")], "test") == 0)
                 train_flag = 0;
-            }
-        }
+        // if (argc > 4)
+        // {
+        //     if (strcmp(argv[4], "train") == 0)
+        //     {
+        //         test_flag = 0;
+        //     }
+        //     else if (strcmp(argv[4], "test") == 0)
+        //     {
+        //         train_flag = 0;
+        //     }
+        // }
 
         /* TRAIN */
         double *b;
@@ -159,14 +168,23 @@ int main(int argc, char const *argv[])
 
     gettimeofday(&t1, NULL); // start timer
 
-    if (argc > 5)
+    if (findYourArg(argc, argv, "-o")!=0)
     {
-        FILE *output_file = fopen(argv[5], "w");
+        FILE *output_file = fopen(argv[findYourArg(argc, argv, "-o")], "w");
         print_all(HT, output_file);
         fclose(output_file);
     }
     else
         print_all(HT);
+    
+    // if (argc > 5)
+    // {
+    //     FILE *output_file = fopen(argv[5], "w");
+    //     print_all(HT, output_file);
+    //     fclose(output_file);
+    // }
+    // else
+    //     print_all(HT);
 
     delete HT;
     if(part>1)
