@@ -98,10 +98,12 @@ int main(int argc, char const *argv[])
 
         bool train_flag = 1, test_flag = 1; /* both training and testing are enabled as default */
         if (findYourArg(argc, argv, "-v")!=0)
+        {
             if (strcmp(argv[findYourArg(argc, argv, "-t")], "train") == 0)
                 test_flag = 0;
-            if (strcmp(argv[findYourArg(argc, argv, "-t")], "test") == 0)
+            else if (strcmp(argv[findYourArg(argc, argv, "-t")], "test") == 0)
                 train_flag = 0;
+        }
         // if (argc > 4)
         // {
         //     if (strcmp(argv[4], "train") == 0)
@@ -156,7 +158,7 @@ int main(int argc, char const *argv[])
             gettimeofday(&t1, NULL); // start timer
 
             printf("----------TEST----------\n");
-            test("test.csv", HT, b, IDF->ht_size());
+            test("train.csv", HT, b, IDF->ht_size());
             printf("------------------------\n");
 
             gettimeofday(&t2, NULL);                              // stop timer

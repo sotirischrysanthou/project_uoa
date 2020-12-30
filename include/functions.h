@@ -32,4 +32,4 @@ double *train(string filename, HashTable ht, HashTable idf, int reps=1);
 /* testing function */
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation=0);
 
-int findYourArg(int argc, const char *argv[], char what[3]);
+int findYourArg(int argc, const char *argv[],const char what[3]);
