@@ -3,7 +3,7 @@
 #include "parser.h"
 #include "compare_funcs.h"
 
-List l = NULL;
+List l = NULL; // global list for printing
 string file_con;
 int ch = 0;
 HashTable tf_ht = NULL;
@@ -453,6 +453,7 @@ List parse(string filename, HashTable returned_tf, HashTable receved_idf)
     idf_ht = receved_idf;
     tf_ht = returned_tf;
 
+    /* the whole file is placed inside a string for parsing */
     file_con = buffer;
     ch = 0;
     json_con = NULL;
