@@ -9,12 +9,12 @@
 int main(int argc, char const *argv[])
 {
     int part = 2;
-    if(findYourArg(argc, argv, "-p")!=0)
+    if (findYourArg(argc, argv, "-p") != 0)
         part = atoi(argv[findYourArg(argc, argv, "-p")]);
     string input_folder = argv[findYourArg(argc, argv, "-d")];
     string csv_file = argv[findYourArg(argc, argv, "-c")];
     bool bow_tfidf = 1;
-    if (findYourArg(argc, argv, "-v")!=0)
+    if (findYourArg(argc, argv, "-v") != 0)
         if (strcmp(argv[findYourArg(argc, argv, "-v")], "bow") == 0)
             bow_tfidf = 0;
 
@@ -60,26 +60,35 @@ int main(int argc, char const *argv[])
     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
     printf("%f s. for csv\n", elapsedTime);
 
+    gettimeofday(&t1, NULL); // start timer
+
+    FILE *output_file = fopen(argv[findYourArg(argc, argv, "-o")], "w");
+    print_all(HT, output_file);
+    fclose(output_file);
+
+    gettimeofday(&t2, NULL);                              // stop timer
+    elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
+    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
+    printf("%f s. for print\n", elapsedTime);
+
     if (part > 1)
     {
         /* split csv */
         string line;
-        int file_lines = lines_counter(csv_file.c_str());
+        int file_lines = lines_counter(argv[findYourArg(argc, argv, "-o")]);
         printf("csv file lines: %d\n", file_lines);
         int counter = 0;
         size_t buffer_size = 0;
         char *buffer = NULL;
-        FILE *stream = fopen(csv_file.c_str(), "r");
+        FILE *stream = fopen(argv[findYourArg(argc, argv, "-o")], "r");
         FILE *train_f = fopen("train.csv", "w");
         FILE *test_f = fopen("test.csv", "w");
 
         if (!stream)
         {
-            printf("Error reading file: %s\n", csv_file.c_str());
+            printf("Error reading file: %s\n", argv[findYourArg(argc, argv, "-o")]);
             return 1;
         }
-        getline(&buffer, &buffer_size, stream);
-        line = buffer;
         fprintf(train_f, "%s", line.c_str());
         fprintf(test_f, "%s", line.c_str());
         while ((getline(&buffer, &buffer_size, stream) != -1))
@@ -97,24 +106,13 @@ int main(int argc, char const *argv[])
         fclose(stream);
 
         bool train_flag = 1, test_flag = 1; /* both training and testing are enabled as default */
-        if (findYourArg(argc, argv, "-v")!=0)
+        if (findYourArg(argc, argv, "-v") != 0)
         {
             if (strcmp(argv[findYourArg(argc, argv, "-t")], "train") == 0)
                 test_flag = 0;
             else if (strcmp(argv[findYourArg(argc, argv, "-t")], "test") == 0)
                 train_flag = 0;
         }
-        // if (argc > 4)
-        // {
-        //     if (strcmp(argv[4], "train") == 0)
-        //     {
-        //         test_flag = 0;
-        //     }
-        //     else if (strcmp(argv[4], "test") == 0)
-        //     {
-        //         train_flag = 0;
-        //     }
-        // }
 
         /* TRAIN */
         double *b;
@@ -158,7 +156,7 @@ int main(int argc, char const *argv[])
             gettimeofday(&t1, NULL); // start timer
 
             printf("----------TEST----------\n");
-            test("train.csv", HT, b, IDF->ht_size());
+            test("test.csv", HT, b, IDF->ht_size());
             printf("------------------------\n");
 
             gettimeofday(&t2, NULL);                              // stop timer
@@ -170,34 +168,9 @@ int main(int argc, char const *argv[])
         delete b;
     }
 
-    gettimeofday(&t1, NULL); // start timer
-
-    if (findYourArg(argc, argv, "-o")!=0)
-    {
-        FILE *output_file = fopen(argv[findYourArg(argc, argv, "-o")], "w");
-        print_all(HT, output_file);
-        fclose(output_file);
-    }
-    else
-        print_all(HT);
-    
-    // if (argc > 5)
-    // {
-    //     FILE *output_file = fopen(argv[5], "w");
-    //     print_all(HT, output_file);
-    //     fclose(output_file);
-    // }
-    // else
-    //     print_all(HT);
-
     delete HT;
-    if(part>1)
+    if (part > 1)
         delete IDF;
-
-    gettimeofday(&t2, NULL);                              // stop timer
-    elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
-    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
-    printf("%f s. for print/delete\n", elapsedTime);
 
     exit(0);
 }

@@ -99,7 +99,9 @@ void similar_items(item *A, item *B)
             HashTable t_ht = t_i->get_common_and_uncommon().uncommon;
             assert(t_ht != NULL);
             // printf("removing...\n");
+            int test_int=t_ht->ht_size();
             t_ht->remove(common_b);
+            assert(t_ht->ht_size()==test_int-1);
         }
         else
         {
@@ -136,6 +138,11 @@ void similar_items(item *A, item *B)
 
 void dissimilar_items(item *a, item *b)
 {
+
+    if(a->get_common_and_uncommon().uncommon->search(b->get_common_and_uncommon().common,cmp_hashtable_search_address))
+    {
+        return;
+    }
     HashTable_Node ht_n;
 
     ht_n = new hashtable_node;
@@ -171,8 +178,42 @@ int list_cmp(Pointer l1, Pointer l2)
         return 1;
 }
 
-void print_commons(HashTable visited_lists, List list_to_visit, FILE *output_file)
+void print_uncommon(HashTable visited_lists, item* it , FILE *output_file)
 {
+    /* outer List vars */
+    List list_of_uncommon_lists=it->get_common_and_uncommon().uncommon->return_list();
+    ListNode Lnode=list_of_uncommon_lists->list_first();
+    
+    /* inner List vars */
+    List uncommon_list;
+    ListNode node_uncommon;
+
+    while (Lnode!=NULL)
+    {
+        uncommon_list=(List)Lnode->value;
+        string *str = new string(((item *)(uncommon_list->list_first()->value))->get_item_full_id());
+        if(visited_lists->search(str, cmp_hashtable_search)) //the uncommon list was visited before
+        {
+            delete str;
+            Lnode=Lnode->next;
+            continue;
+        }
+        delete str;
+        node_uncommon = uncommon_list->list_first();
+        while(node_uncommon!=NULL)
+        {
+            fprintf(output_file, "%s,%s,0\n", it->get_item_full_id().c_str(), ((item*)node_uncommon->value)->get_item_full_id().c_str());
+            node_uncommon=node_uncommon->next;
+        }
+        Lnode=Lnode->next;
+    }
+    
+    delete list_of_uncommon_lists;
+}
+
+void print_commons(HashTable visited_lists, item* it , FILE *output_file)
+{
+    List list_to_visit=it->get_common_and_uncommon().common;
     string *str = new string(((item *)(list_to_visit->list_first()->value))->get_item_full_id());
     if (visited_lists->search(str, cmp_hashtable_search))
     {
@@ -187,15 +228,19 @@ void print_commons(HashTable visited_lists, List list_to_visit, FILE *output_fil
     {
         nodeTwo = list_to_visit->list_next(nodeTwo);
         itemTwo = (item *)list_to_visit->list_node_value(nodeTwo);
-        fprintf(output_file, "%s,%s\n", itemOne->get_item_full_id().c_str(), itemTwo->get_item_full_id().c_str());
+        fprintf(output_file, "%s,%s,1\n", itemOne->get_item_full_id().c_str(), itemTwo->get_item_full_id().c_str());
         if (nodeTwo == list_to_visit->list_last())
         {
+            print_uncommon(visited_lists,itemOne,output_file);
             nodeOne = list_to_visit->list_next(nodeOne);
             itemOne = (item *)list_to_visit->list_node_value(nodeOne);
             nodeTwo = nodeOne;
             itemTwo = itemOne;
         }
+
     }
+    print_uncommon(visited_lists,itemOne,output_file);
+
     HashTable_Node ht_n = new hashtable_node;
     ht_n->key = str;
     ht_n->value = list_to_visit;
@@ -358,10 +403,10 @@ void destroy_list(Pointer value)
     delete (List)value;
 }
 
-void print_all_commons(Pointer value)
+void print_all_commons(item* value)
 {
     // printf("%s\n",((item*)value)->get_item_full_id().c_str());
-    print_commons(visited_lists, ((item *)value)->get_common_and_uncommon().common, output);
+    print_commons(visited_lists, value, output);
 }
 
 void del_visited_lists_ht(Pointer value)
@@ -725,3 +770,31 @@ int findYourArg(int argc, const char *argv[],const char what[3])
     }
     return 0;
 }
+
+
+/* 
+A-B-C-D
+
+E-F-G-H-I-J-K
+|
+L-M-N-O-P
+
+------------------
+
+E-F-G-H-I-J-K
+
+A-B-C-D
+
+------------------
+
+L-M-N-O-P
+
+A-B-C-D
+*/
+
+/*
+A=B 
+B=C
+
+A-B-C
+*/

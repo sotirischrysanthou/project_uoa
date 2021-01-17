@@ -90,7 +90,7 @@ void hashtable::remove(Pointer key)
     List chain = table[hashfunction(key,buckets)];
     assert(chain->list_size()!=0);
     ListNode tempNode = chain->list_first();
-    if (tempNode->value == key)
+    if (((HashTable_Node)tempNode->value)->key == key)
     {
         chain->list_remove_next(NULL);
         size--;
