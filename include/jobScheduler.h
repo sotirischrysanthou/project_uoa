@@ -21,6 +21,11 @@ struct jobScheduler
     pthread_cond_t cond;
 
     jobScheduler(int t_count);
+    void submit_job(job *j);
+    void execute_jobs();
+    void wait_all();
+    ~jobScheduler();
+
 };
 
 #endif
