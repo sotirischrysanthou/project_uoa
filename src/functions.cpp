@@ -1,7 +1,8 @@
-#include "functions.h"
 #include <assert.h>
 #include <sys/time.h>
 #include <math.h>
+#include "functions.h"
+#include "jobScheduler.h"
 
 // void similar_items(item *A, item *B)
 // {
@@ -99,9 +100,9 @@ void similar_items(item *A, item *B)
             HashTable t_ht = t_i->get_common_and_uncommon().uncommon;
             assert(t_ht != NULL);
             // printf("removing...\n");
-            int test_int=t_ht->ht_size();
+            int test_int = t_ht->ht_size();
             t_ht->remove(common_b);
-            assert(t_ht->ht_size()==test_int-1);
+            assert(t_ht->ht_size() == test_int - 1);
         }
         else
         {
@@ -139,7 +140,7 @@ void similar_items(item *A, item *B)
 void dissimilar_items(item *a, item *b)
 {
 
-    if(a->get_common_and_uncommon().uncommon->search(b->get_common_and_uncommon().common,cmp_hashtable_search_address))
+    if (a->get_common_and_uncommon().uncommon->search(b->get_common_and_uncommon().common, cmp_hashtable_search_address))
     {
         return;
     }
@@ -178,42 +179,42 @@ int list_cmp(Pointer l1, Pointer l2)
         return 1;
 }
 
-void print_uncommon(HashTable visited_lists, item* it , FILE *output_file)
+void print_uncommon(HashTable visited_lists, item *it, FILE *output_file)
 {
     /* outer List vars */
-    List list_of_uncommon_lists=it->get_common_and_uncommon().uncommon->return_list();
-    ListNode Lnode=list_of_uncommon_lists->list_first();
-    
+    List list_of_uncommon_lists = it->get_common_and_uncommon().uncommon->return_list();
+    ListNode Lnode = list_of_uncommon_lists->list_first();
+
     /* inner List vars */
     List uncommon_list;
     ListNode node_uncommon;
 
-    while (Lnode!=NULL)
+    while (Lnode != NULL)
     {
-        uncommon_list=(List)Lnode->value;
+        uncommon_list = (List)Lnode->value;
         string *str = new string(((item *)(uncommon_list->list_first()->value))->get_item_full_id());
-        if(visited_lists->search(str, cmp_hashtable_search)) //the uncommon list was visited before
+        if (visited_lists->search(str, cmp_hashtable_search)) //the uncommon list was visited before
         {
             delete str;
-            Lnode=Lnode->next;
+            Lnode = Lnode->next;
             continue;
         }
         delete str;
         node_uncommon = uncommon_list->list_first();
-        while(node_uncommon!=NULL)
+        while (node_uncommon != NULL)
         {
-            fprintf(output_file, "%s,%s,0\n", it->get_item_full_id().c_str(), ((item*)node_uncommon->value)->get_item_full_id().c_str());
-            node_uncommon=node_uncommon->next;
+            fprintf(output_file, "%s,%s,0\n", it->get_item_full_id().c_str(), ((item *)node_uncommon->value)->get_item_full_id().c_str());
+            node_uncommon = node_uncommon->next;
         }
-        Lnode=Lnode->next;
+        Lnode = Lnode->next;
     }
-    
+
     delete list_of_uncommon_lists;
 }
 
-void print_commons(HashTable visited_lists, item* it , FILE *output_file)
+void print_commons(HashTable visited_lists, item *it, FILE *output_file)
 {
-    List list_to_visit=it->get_common_and_uncommon().common;
+    List list_to_visit = it->get_common_and_uncommon().common;
     string *str = new string(((item *)(list_to_visit->list_first()->value))->get_item_full_id());
     if (visited_lists->search(str, cmp_hashtable_search))
     {
@@ -231,15 +232,14 @@ void print_commons(HashTable visited_lists, item* it , FILE *output_file)
         fprintf(output_file, "%s,%s,1\n", itemOne->get_item_full_id().c_str(), itemTwo->get_item_full_id().c_str());
         if (nodeTwo == list_to_visit->list_last())
         {
-            print_uncommon(visited_lists,itemOne,output_file);
+            print_uncommon(visited_lists, itemOne, output_file);
             nodeOne = list_to_visit->list_next(nodeOne);
             itemOne = (item *)list_to_visit->list_node_value(nodeOne);
             nodeTwo = nodeOne;
             itemTwo = itemOne;
         }
-
     }
-    print_uncommon(visited_lists,itemOne,output_file);
+    print_uncommon(visited_lists, itemOne, output_file);
 
     HashTable_Node ht_n = new hashtable_node;
     ht_n->key = str;
@@ -403,7 +403,7 @@ void destroy_list(Pointer value)
     delete (List)value;
 }
 
-void print_all_commons(item* value)
+void print_all_commons(item *value)
 {
     // printf("%s\n",((item*)value)->get_item_full_id().c_str());
     print_commons(visited_lists, value, output);
@@ -552,7 +552,8 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
     item *it1, *it2;
     string name1, name2, line;
     int num1, num2, similar, comma1, comma2, slash1, slash2;
-    int i, counter;
+    int i;
+    // int counter;
     double a = 0.5;
     double e = 2.71;
     double b = 0.0;
@@ -563,10 +564,10 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
     double new_W[idf->ht_size()] = {0.0};
     /* last position of the best weights array is the best b */
     double *best_W = new double[idf->ht_size() + 1]();
-    
+
     for (i = 0; i < reps; i++)
     {
-        counter = 0;
+        // counter = 0;
         size_t buffer_size = 0;
         char *buffer = NULL;
         FILE *stream = fopen(filename.c_str(), "r");
@@ -575,6 +576,9 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
             printf("Error reading file: %s\n", filename.c_str());
             return NULL;
         }
+
+        // split threads
+
         getline(&buffer, &buffer_size, stream);
         while ((getline(&buffer, &buffer_size, stream) != -1))
         {
@@ -608,6 +612,8 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
                 x[j] = abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]);
                 // x[j] = (it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]) / 2;
             }
+
+            //critical start-------------------------------------------------------------------------------------------------------------------
             f = b;
             for (int j = 0; j < idf->ht_size(); j++)
             {
@@ -647,12 +653,14 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
                 }
             }
 
+            //critical stop-------------------------------------------------------------------------------------------------------------------
 
-            counter++;
+            // counter++;
             // getchar();
         }
         free(buffer);
         fclose(stream);
+        //merge threads
     }
     /* write best weights and b into a file */
     FILE *W_best = fopen("./best_W", "w");
@@ -662,6 +670,123 @@ double *train(string filename, HashTable ht, HashTable idf, int reps)
     }
 
     return best_W;
+}
+
+struct train_data
+{
+    int line_count;
+    string *lines;
+    HashTable ht;
+    HashTable idf;
+    int reps;
+    double *W;
+    double *return_table;
+};
+
+/* code to be run by threads */
+void train_thread(Pointer data_p)
+{
+    train_data *data = (train_data *)data_p;
+
+    HashTable ht_items;
+    item *it1, *it2;
+    string name1, name2, line;
+    int num1, num2, similar, comma1, comma2, slash1, slash2;
+    int i;
+    // int counter;
+    double a = 0.5;
+    double e = 2.71;
+    double b = 0.0;
+    double f, sigma;
+    /* last position of the delta array is the b */
+    data->return_table = new double[data->idf->ht_size() + 1];
+    double x[data->idf->ht_size()];
+    for (i = 0; i < data->reps; i++)
+    {
+        // counter = 0;
+        for (int n = 0; n < data->line_count; n++)
+        {
+            line = data->lines[n];
+            slash1 = line.find("//");
+            comma1 = line.find(',', slash1);
+            slash2 = line.find("//", comma1);
+            comma2 = line.find(',', slash2);
+
+            name1 = line.substr(0, slash1);
+            num1 = stoi(line.substr(slash1 + 2, comma1 - slash1 + 2));
+            name2 = line.substr(comma1 + 1, slash2 - comma1 + 1 - 2);
+            num2 = stoi(line.substr(slash2 + 2, comma2 - slash2 + 2));
+            similar = stoi(line.substr(comma2 + 1));
+
+            // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
+
+            ht_items = (HashTable)data->ht->search(&name1, cmp_hashtable_search);
+            if (ht_items == NULL)
+                continue;
+            it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
+            ht_items = (HashTable)data->ht->search(&name2, cmp_hashtable_search);
+            if (ht_items == NULL)
+                continue;
+            it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
+
+            /* merge tables */
+
+            for (int j = 0; j < data->idf->ht_size(); j++)
+            {
+                x[j] = abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]);
+                // x[j] = (it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]) / 2;
+            }
+
+            f = b;
+            for (int j = 0; j < data->idf->ht_size(); j++)
+            {
+                f += data->W[j] * x[j];
+            }
+
+            sigma = 1.0 / (1.0 + pow(e, (-1.0) * f));
+
+            /* this is b */
+            data->return_table[data->idf->ht_size()] = (sigma - similar);
+
+            for (int j = 0; j < data->idf->ht_size(); j++)
+            {
+                data->return_table[j] = (sigma - similar) * x[j];
+            }
+        }
+    }
+}
+
+
+double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count)
+{
+    jobScheduler jsched(thread_count);
+    train_data t_data[thread_count];
+    string lines[lines_counter(filename.c_str())];
+    int i;
+    size_t buffer_size = 0;
+    char *buffer = NULL;
+    FILE *stream = fopen(filename.c_str(), "r");
+    if (!stream)
+    {
+        printf("Error reading file: %s\n", filename.c_str());
+        return NULL;
+    }
+
+    getline(&buffer, &buffer_size, stream);
+    i = 0;
+    while ((getline(&buffer, &buffer_size, stream) != -1))
+    {
+        lines[i] = buffer;
+        i++;
+    }
+
+    for(i=0;i<thread_count;i++)
+    {
+        
+    }
+
+
+
 }
 
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation)
@@ -731,7 +856,6 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
             {
                 // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
             }
-            
         }
         else if (similar == 0)
         {
@@ -745,18 +869,17 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
             {
                 // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
             }
-            
         }
         total++;
 
         // if (similar)
         // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
     }
-    
-    printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1,t1);
+
+    printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1, t1);
 }
 
-int findYourArg(int argc, const char *argv[],const char what[3])
+int findYourArg(int argc, const char *argv[], const char what[3])
 {
     for (int i = 1; i < argc; i++)
     {
@@ -770,31 +893,3 @@ int findYourArg(int argc, const char *argv[],const char what[3])
     }
     return 0;
 }
-
-
-/* 
-A-B-C-D
-
-E-F-G-H-I-J-K
-|
-L-M-N-O-P
-
-------------------
-
-E-F-G-H-I-J-K
-
-A-B-C-D
-
-------------------
-
-L-M-N-O-P
-
-A-B-C-D
-*/
-
-/*
-A=B 
-B=C
-
-A-B-C
-*/
