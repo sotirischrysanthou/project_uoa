@@ -4,72 +4,6 @@
 #include "functions.h"
 #include "jobScheduler.h"
 
-// void similar_items(item *A, item *B)
-// {
-//     List Acommon_l = A->get_common_and_uncommon().common;
-//     List Bcommon_l = B->get_common_and_uncommon().common;
-//     HashTable Auncommon_ht = A->get_common_and_uncommon().uncommon;
-//     HashTable Buncommon_ht = B->get_common_and_uncommon().uncommon;
-//     List main_l = Acommon_l;
-//     List to_del_l = Bcommon_l;
-//     HashTable main_ht = Auncommon_ht;
-//     HashTable to_del_ht = Buncommon_ht;
-//     item *temp;
-//     if (main_l == to_del_l)
-//         return;
-//     if (Acommon_l->list_size() < Bcommon_l->list_size())
-//     {
-//         temp=A;
-//         A=B;
-//         B=temp;
-//         main_l = Bcommon_l;
-//         to_del_l = Acommon_l;
-//         main_ht = Buncommon_ht;
-//         to_del_ht = Auncommon_ht;
-//     }
-//     item *tempItem;
-//     ListNode tempNode = to_del_l->list_first();
-//     HashTable_Node ht_n;
-
-//     List to_del_ht_l=to_del_ht->return_list();
-//     tempNode = to_del_ht_l->list_first();
-//     while(tempNode != NULL)
-//     {
-//         if(main_ht->search(tempNode->value, cmp_hashtable_search_address))
-//         {
-//             List to_visit_l=(List)(tempNode->value);
-//             ListNode node=to_visit_l->list_first();
-//             item * tempItem=(item *)node->value;
-//             HashTable tempHt = tempItem->get_common_and_uncommon().uncommon;
-//             printf("-=-=-=-\n");
-//             assert(tempHt!=NULL);
-//             if(tempHt->search(to_del_l,cmp_hashtable_search_address))
-//                 tempHt->remove(to_del_l);
-//         }
-//         else
-//         {
-//             ht_n = new hashtable_node;
-//             ht_n->key = tempNode->value;
-//             ht_n->value = tempNode->value;
-//             main_ht->insert(ht_n);
-//         }
-//         B->change_uncommon_ht(A->get_common_and_uncommon().uncommon);
-//         tempNode = to_del_ht_l->list_next(tempNode);
-//     }
-
-//     tempNode=to_del_l->list_first();
-//     do
-//     {
-//         tempItem = (item *)to_del_l->list_node_value(tempNode);
-//         tempItem->change_common_list(main_l);
-//         main_l->list_insert_next(main_l->list_last(), tempItem);
-//         tempNode = to_del_l->list_next(tempNode);
-//     } while (tempNode != NULL);
-
-//     delete to_del_l;
-
-// }
-
 void similar_items(item *A, item *B)
 {
     if (A->get_common_and_uncommon().common == B->get_common_and_uncommon().common)
@@ -680,8 +614,8 @@ struct train_data
     HashTable idf;
     int reps;
     double *W;
-    double *return_table;
 };
+
 class train_job : public job
 {
     train_data *data;
@@ -706,7 +640,8 @@ public:
         double b = 0.0;
         double f, sigma;
         /* last position of the delta array is the b */
-        data->return_table = new double[data->idf->ht_size() + 1];
+        double *return_table = new double[data->idf->ht_size() + 1];
+
         double x[data->idf->ht_size()];
         for (i = 0; i < data->reps; i++)
         {
@@ -753,15 +688,15 @@ public:
                 sigma = 1.0 / (1.0 + pow(e, (-1.0) * f));
 
                 /* this is b */
-                data->return_table[data->idf->ht_size()] = (sigma - similar);
+                return_table[data->idf->ht_size()] = (sigma - similar);
 
                 for (int j = 0; j < data->idf->ht_size(); j++)
                 {
-                    data->return_table[j] = (sigma - similar) * x[j];
+                    return_table[j] = (sigma - similar) * x[j];
                 }
             }
         }
-        return data->return_table;
+        return return_table;
     }
 };
 
@@ -770,7 +705,12 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
     jobScheduler jsched(thread_count, pool_size);
     train_data t_data[thread_count];
     string lines[lines_counter(filename.c_str())];
-    int i;
+    /* last position is b */
+    double *W = new double[idf->ht_size() + 1]();
+    double new_W[idf->ht_size() + 1];
+    double best_W[idf->ht_size() + 1] = {0};
+    double a = 0.5;
+    int i, all_lines, counter = 0;
     size_t buffer_size = 0;
     char *buffer = NULL;
     FILE *stream = fopen(filename.c_str(), "r");
@@ -787,15 +727,66 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
         lines[i] = buffer;
         i++;
     }
+    all_lines = i;
 
-    /* 
-        submit thread_count jobs of batch_size number of lines with current w
-        collect all w from the return_list
-        change current w
-        repeat
-     */
+    int loops = all_lines / (batch_size * thread_count);
+    if (all_lines % (batch_size * thread_count) > 0)
+        loops++;
 
-    
+    for (int l = 0; l < loops; l++)
+    {
+        /* submit jobs */
+        train_data *ta;
+        for (i = 0; i < thread_count; i++)
+        {
+            if (all_lines - (i * batch_size) <= 0)
+                break;
+            ta = new train_data;
+            ta->ht = ht;
+            ta->idf = idf;
+            ta->reps = reps;
+            ta->W = W;
+            if (all_lines - ((i + 1) * batch_size) >= 0)
+                ta->line_count = batch_size;
+            else
+                ta->line_count = all_lines - (i * batch_size);
+            ta->lines = &lines[i * ta->line_count];
+
+            jsched.submit_job(new train_job(ta));
+        }
+
+        ListNode node;
+        double sum;
+        int div;
+
+        /* change w */
+        for (i = 0; i <= idf->ht_size(); i++)
+        {
+            node = jsched.get_return_values()->list_first();
+            sum = 0.0;
+            div = 0;
+            while (node != NULL)
+            {
+                sum += ((double *)node->value)[i];
+                div++;
+                node = node->next;
+            }
+            new_W[i] = W[i] - a * (sum / (div * 1.0));
+            if ((new_W[i] - W[i]) > 0.00001)
+            {
+                W[i] = new_W[i];
+                // printf("%d -- W[%d] changed\n", counter, j);
+            }
+            else
+            {
+                best_W[i] = W[i];
+                W[i] = new_W[i];
+                // printf("%d -- W[%d] is best\n", counter, j);
+            }
+        }
+    }
+
+    jsched.wait_all();
 }
 
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation)

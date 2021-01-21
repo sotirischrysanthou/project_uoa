@@ -38,7 +38,7 @@ struct thread_args
     List return_values;
 };
 
-struct jobScheduler
+class jobScheduler
 {
     int thread_count; // number of execution threads
     pool_t *pool;     // a pool that holds submitted jobs / tasks
@@ -49,9 +49,9 @@ struct jobScheduler
     pthread_cond_t cond_nonempty;
 
     thread_args *t_args;
-
     List return_values;
-
+    
+public:
     jobScheduler(int t_count, int p_size);
     void submit_job(job *j);
     void execute_jobs();
