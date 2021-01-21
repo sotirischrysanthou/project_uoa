@@ -6,26 +6,59 @@
 #include "List.h"
 #include <pthread.h>
 
-struct job
-{
-    
+typedef class job *Job;
 
+/* other job classes will extend
+   this and have their arguments
+   as variables to be used in run() */
+class job
+{
+    public:
+    virtual Pointer run();
+};
+
+struct pool_t
+{
+    Job *jobs;
+    int start = 0;
+    int end = -1;
+    int count = 0;
+    int size;
+    pool_t(int size);
+    ~pool_t();
+};
+
+struct thread_args
+{
+    pool_t *pool;
+    pthread_mutex_t *mutex;
+    pthread_mutex_t *list_mutex;
+    pthread_cond_t *cond_nonfull;
+    pthread_cond_t *cond_nonempty;
+    List return_values;
 };
 
 struct jobScheduler
 {
     int thread_count; // number of execution threads
-    List queue;              // a queue that holds submitted jobs / tasks
-    pthread_t *tids;      // execution threads
+    pool_t *pool;     // a pool that holds submitted jobs / tasks
+    pthread_t *tids;  // execution threads
     pthread_mutex_t mutex;
-    pthread_cond_t cond;
+    pthread_mutex_t list_mutex;
+    pthread_cond_t cond_nonfull;
+    pthread_cond_t cond_nonempty;
 
-    jobScheduler(int t_count);
+    thread_args *t_args;
+
+    List return_values;
+
+    jobScheduler(int t_count, int p_size);
     void submit_job(job *j);
     void execute_jobs();
+    List get_return_values();
     void wait_all();
     ~jobScheduler();
-
 };
 
 #endif
+

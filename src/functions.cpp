@@ -682,84 +682,92 @@ struct train_data
     double *W;
     double *return_table;
 };
-
-/* code to be run by threads */
-void train_thread(Pointer data_p)
+class train_job : public job
 {
-    train_data *data = (train_data *)data_p;
+    train_data *data;
 
-    HashTable ht_items;
-    item *it1, *it2;
-    string name1, name2, line;
-    int num1, num2, similar, comma1, comma2, slash1, slash2;
-    int i;
-    // int counter;
-    double a = 0.5;
-    double e = 2.71;
-    double b = 0.0;
-    double f, sigma;
-    /* last position of the delta array is the b */
-    data->return_table = new double[data->idf->ht_size() + 1];
-    double x[data->idf->ht_size()];
-    for (i = 0; i < data->reps; i++)
+public:
+    train_job(Pointer data_p)
     {
-        // counter = 0;
-        for (int n = 0; n < data->line_count; n++)
+        data = (train_data *)data_p;
+    }
+    /* code to be run by threads */
+    Pointer run()
+    {
+
+        HashTable ht_items;
+        item *it1, *it2;
+        string name1, name2, line;
+        int num1, num2, similar, comma1, comma2, slash1, slash2;
+        int i;
+        // int counter;
+        double a = 0.5;
+        double e = 2.71;
+        double b = 0.0;
+        double f, sigma;
+        /* last position of the delta array is the b */
+        data->return_table = new double[data->idf->ht_size() + 1];
+        double x[data->idf->ht_size()];
+        for (i = 0; i < data->reps; i++)
         {
-            line = data->lines[n];
-            slash1 = line.find("//");
-            comma1 = line.find(',', slash1);
-            slash2 = line.find("//", comma1);
-            comma2 = line.find(',', slash2);
-
-            name1 = line.substr(0, slash1);
-            num1 = stoi(line.substr(slash1 + 2, comma1 - slash1 + 2));
-            name2 = line.substr(comma1 + 1, slash2 - comma1 + 1 - 2);
-            num2 = stoi(line.substr(slash2 + 2, comma2 - slash2 + 2));
-            similar = stoi(line.substr(comma2 + 1));
-
-            // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
-
-            ht_items = (HashTable)data->ht->search(&name1, cmp_hashtable_search);
-            if (ht_items == NULL)
-                continue;
-            it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
-            ht_items = (HashTable)data->ht->search(&name2, cmp_hashtable_search);
-            if (ht_items == NULL)
-                continue;
-            it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
-
-            /* merge tables */
-
-            for (int j = 0; j < data->idf->ht_size(); j++)
+            // counter = 0;
+            for (int n = 0; n < data->line_count; n++)
             {
-                x[j] = abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]);
-                // x[j] = (it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]) / 2;
-            }
+                line = data->lines[n];
+                slash1 = line.find("//");
+                comma1 = line.find(',', slash1);
+                slash2 = line.find("//", comma1);
+                comma2 = line.find(',', slash2);
 
-            f = b;
-            for (int j = 0; j < data->idf->ht_size(); j++)
-            {
-                f += data->W[j] * x[j];
-            }
+                name1 = line.substr(0, slash1);
+                num1 = stoi(line.substr(slash1 + 2, comma1 - slash1 + 2));
+                name2 = line.substr(comma1 + 1, slash2 - comma1 + 1 - 2);
+                num2 = stoi(line.substr(slash2 + 2, comma2 - slash2 + 2));
+                similar = stoi(line.substr(comma2 + 1));
 
-            sigma = 1.0 / (1.0 + pow(e, (-1.0) * f));
+                // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
 
-            /* this is b */
-            data->return_table[data->idf->ht_size()] = (sigma - similar);
+                ht_items = (HashTable)data->ht->search(&name1, cmp_hashtable_search);
+                if (ht_items == NULL)
+                    continue;
+                it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
+                ht_items = (HashTable)data->ht->search(&name2, cmp_hashtable_search);
+                if (ht_items == NULL)
+                    continue;
+                it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
 
-            for (int j = 0; j < data->idf->ht_size(); j++)
-            {
-                data->return_table[j] = (sigma - similar) * x[j];
+                /* merge tables */
+
+                for (int j = 0; j < data->idf->ht_size(); j++)
+                {
+                    x[j] = abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]);
+                    // x[j] = (it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]) / 2;
+                }
+
+                f = b;
+                for (int j = 0; j < data->idf->ht_size(); j++)
+                {
+                    f += data->W[j] * x[j];
+                }
+
+                sigma = 1.0 / (1.0 + pow(e, (-1.0) * f));
+
+                /* this is b */
+                data->return_table[data->idf->ht_size()] = (sigma - similar);
+
+                for (int j = 0; j < data->idf->ht_size(); j++)
+                {
+                    data->return_table[j] = (sigma - similar) * x[j];
+                }
             }
         }
+        return data->return_table;
     }
-}
+};
 
-
-double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count)
+double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count, int pool_size)
 {
-    jobScheduler jsched(thread_count);
+    jobScheduler jsched(thread_count, pool_size);
     train_data t_data[thread_count];
     string lines[lines_counter(filename.c_str())];
     int i;
@@ -780,13 +788,14 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
         i++;
     }
 
-    for(i=0;i<thread_count;i++)
-    {
-        
-    }
+    /* 
+        submit thread_count jobs of batch_size number of lines with current w
+        collect all w from the return_list
+        change current w
+        repeat
+     */
 
-
-
+    
 }
 
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation)
