@@ -124,10 +124,12 @@ int main(int argc, char const *argv[])
             gettimeofday(&t1, NULL); // start timer
 
             /* 10 iterations seemed to give the best results */
-            // b = train("train.csv", HT, IDF, 5);
-            b = train_main_thread("train.csv", HT, IDF, 5, 1000, 10, 10);
-            /*  for medium: ~1.30m
-                for large:  ~9m      */
+            if(part>2)
+                b = train_main_thread("train.csv", HT, IDF, 5, 1000, 10, 10);
+            else
+                b = train("train.csv", HT, IDF, 5);
+                /*  for medium: ~1.30m
+                    for large:  ~9m      */
 
             gettimeofday(&t2, NULL);                              // stop timer
             elapsedTime = (t2.tv_sec - t1.tv_sec);                // sec to ms
@@ -160,6 +162,9 @@ int main(int argc, char const *argv[])
             gettimeofday(&t1, NULL); // start timer
 
             printf("----------TEST----------\n");
+            //TODO: if (part>2)
+            //TODO:     thread_train
+            //TODO: else
             test("test.csv", HT, b, IDF->ht_size());
             printf("------------------------\n");
 
