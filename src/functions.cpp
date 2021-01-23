@@ -635,7 +635,6 @@ public:
         int num1, num2, similar, comma1, comma2, slash1, slash2;
         int i;
         // int counter;
-        double a = 0.5;
         double e = 2.71;
         double b = 0.0;
         double f, sigma;
@@ -703,7 +702,7 @@ public:
 double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count, int pool_size)
 {
     jobScheduler* jsched=new jobScheduler(thread_count, pool_size);
-    train_data t_data[thread_count];
+    //TODO: train_data *t_data = new train_data[thread_count];
     string *lines = new string[lines_counter(filename.c_str())];
     /* last position is b */
     double *W = new double[idf->ht_size() + 1]();
@@ -731,19 +730,23 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
     all_lines = i;
 
     int loops = all_lines / (batch_size * thread_count);
+    /* if the division is not perfect, then another loop must be executed with the remaining lines */
     if (all_lines % (batch_size * thread_count) > 0)
         loops++;
 
+    train_data *ta;
     for (int l = 0; l < loops; l++)
     {
         // printf("loop %d\t\t",l);
         /* submit jobs */
-        train_data *ta;
+        
         for (i = 0; i < thread_count; i++)
         {
             // printf("thread %d\n", i);
             if (all_lines - (i * batch_size) <= 0)
                 break;
+            //TODO: ta = &t_data[i];
+            //TODO: remove next line
             ta = new train_data;
             ta->ht = ht;
             ta->idf = idf;
@@ -751,7 +754,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
             ta->W = W;
             if (all_lines - ((i + 1) * batch_size) >= 0)
                 ta->line_count = batch_size;
-            else
+            else /* this is the final batch with fewer lines than the rest */
                 ta->line_count = all_lines - (i * batch_size);
             ta->lines = &lines[i * ta->line_count];
 

@@ -61,7 +61,6 @@ jobScheduler::jobScheduler(int t_count, int p_size) : thread_count(t_count)
     return_values = new list(NULL);
     running_threads = 0;
 
-    // TODO : check initializations (espesially conditions)
     pthread_mutex_init(&mutex, 0);
     pthread_mutex_init(&list_mutex, 0);
     pthread_mutex_init(&mtx_running_threads, 0);
