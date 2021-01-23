@@ -702,15 +702,15 @@ public:
 
 double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count, int pool_size)
 {
-    jobScheduler jsched(thread_count, pool_size);
+    jobScheduler* jsched=new jobScheduler(thread_count, pool_size);
     train_data t_data[thread_count];
-    string lines[lines_counter(filename.c_str())];
+    string *lines = new string[lines_counter(filename.c_str())];
     /* last position is b */
     double *W = new double[idf->ht_size() + 1]();
     double new_W[idf->ht_size() + 1];
-    double best_W[idf->ht_size() + 1] = {0};
-    double a = 0.5;
-    int i, all_lines, counter = 0;
+    double *best_W = new double[idf->ht_size() + 1]();
+    double a = 0.6;
+    int i, all_lines;
     size_t buffer_size = 0;
     char *buffer = NULL;
     FILE *stream = fopen(filename.c_str(), "r");
@@ -727,6 +727,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
         lines[i] = buffer;
         i++;
     }
+    fclose(stream);
     all_lines = i;
 
     int loops = all_lines / (batch_size * thread_count);
@@ -735,10 +736,12 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
 
     for (int l = 0; l < loops; l++)
     {
+        // printf("loop %d\t\t",l);
         /* submit jobs */
         train_data *ta;
         for (i = 0; i < thread_count; i++)
         {
+            // printf("thread %d\n", i);
             if (all_lines - (i * batch_size) <= 0)
                 break;
             ta = new train_data;
@@ -752,17 +755,18 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
                 ta->line_count = all_lines - (i * batch_size);
             ta->lines = &lines[i * ta->line_count];
 
-            jsched.submit_job(new train_job(ta));
+            jsched->submit_job(new train_job(ta));
         }
 
         ListNode node;
         double sum;
         int div;
-
+        jsched->wait_all();
         /* change w */
         for (i = 0; i <= idf->ht_size(); i++)
         {
-            node = jsched.get_return_values()->list_first();
+       
+            node = jsched->get_return_values()->list_first();
             sum = 0.0;
             div = 0;
             while (node != NULL)
@@ -771,6 +775,10 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
                 div++;
                 node = node->next;
             }
+
+            // printf("%.30f ----------------------\n",(div * 1.0));
+            // getchar();
+            
             new_W[i] = W[i] - a * (sum / (div * 1.0));
             if ((new_W[i] - W[i]) > 0.00001)
             {
@@ -781,12 +789,22 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
             {
                 best_W[i] = W[i];
                 W[i] = new_W[i];
-                // printf("%d -- W[%d] is best\n", counter, j);
+                // printf( "%f -- W[%d] is best\n",W[i], i);
             }
         }
     }
 
-    jsched.wait_all();
+
+    /* write best weights and b into a file */
+    FILE *W_best = fopen("./best_W", "w");
+    for (i = 0; i <= idf->ht_size(); i++)
+    {
+        fprintf(W_best, "%f\n", best_W[i]);
+    }
+    fclose(W_best);
+    delete jsched;
+    delete[] lines;
+    return best_W;
 }
 
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation)
@@ -844,30 +862,33 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         }
         res = 1.0 / (1.0 + pow(e, (-1.0) * sum));
         /* after processing the results, the threshhold was decided at 0.2 */
-        if (similar == 1)
+        if (similar)
         {
             t1++;
-            if (res > 0.01)
+            if (res > 0.0000000000001)
             {
                 s1++;
                 score++;
+                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
             }
             else
             {
-                // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
             }
         }
-        else if (similar == 0)
+        else
         {
             t0++;
-            if (res <= 0.01)
+            if (res <= 0.0000000000001)
             {
                 s0++;
                 score++;
+                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+
             }
             else
             {
-                // printf("sum = %f, res = %f, similar = %d\n", sum, res, similar);
+                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
             }
         }
         total++;

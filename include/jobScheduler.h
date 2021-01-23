@@ -14,7 +14,7 @@ typedef class job *Job;
 class job
 {
     public:
-    virtual Pointer run();
+    virtual Pointer run()=0;
 };
 
 struct pool_t
@@ -33,9 +33,12 @@ struct thread_args
     pool_t *pool;
     pthread_mutex_t *mutex;
     pthread_mutex_t *list_mutex;
+    pthread_mutex_t *mtx_running_threads;
     pthread_cond_t *cond_nonfull;
     pthread_cond_t *cond_nonempty;
+    pthread_cond_t *cond_running;
     List return_values;
+    int *running_threads;
 };
 
 class jobScheduler
@@ -44,9 +47,12 @@ class jobScheduler
     pool_t *pool;     // a pool that holds submitted jobs / tasks
     pthread_t *tids;  // execution threads
     pthread_mutex_t mutex;
+    pthread_mutex_t mtx_running_threads;
     pthread_mutex_t list_mutex;
     pthread_cond_t cond_nonfull;
     pthread_cond_t cond_nonempty;
+    pthread_cond_t cond_running;
+    int running_threads;
 
     thread_args *t_args;
     List return_values;
@@ -57,8 +63,14 @@ public:
     void execute_jobs();
     List get_return_values();
     void wait_all();
+
+    void terminate_all();
     ~jobScheduler();
 };
+
+
+
+void *thread_main(void *args);
 
 #endif
 

@@ -105,6 +105,9 @@ int main(int argc, char const *argv[])
         fclose(test_f);
         fclose(stream);
 
+
+
+
         bool train_flag = 1, test_flag = 1; /* both training and testing are enabled as default */
         if (findYourArg(argc, argv, "-v") != 0)
         {
@@ -121,7 +124,8 @@ int main(int argc, char const *argv[])
             gettimeofday(&t1, NULL); // start timer
 
             /* 10 iterations seemed to give the best results */
-            b = train("train.csv", HT, IDF, 5);
+            // b = train("train.csv", HT, IDF, 5);
+            b = train_main_thread("train.csv", HT, IDF, 5, 1000, 10, 10);
             /*  for medium: ~1.30m
                 for large:  ~9m      */
 

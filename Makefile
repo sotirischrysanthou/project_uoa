@@ -1,6 +1,6 @@
 CXX=       	g++
-CXXFLAGS= 	-g -gdwarf-2 -std=gnu++11 -Wall -Iinclude -fPIC -lm
-LDFLAGS=	-Llib
+CXXFLAGS= 	-g -gdwarf-2 -std=gnu++11 -Wall -Iinclude -fPIC -lm -lpthread
+LDFLAGS=	-Llib -lproject -lpthread
 AR=		ar
 ARFLAGS=	rcs
 
@@ -19,17 +19,17 @@ TEST_PROGRAM=	./test
 all:    $(LIB_STATIC) $(SHELL_PROGRAM) $(TEST_PROGRAM)
 
 %.o:	%.cpp $(LIB_HEADERS)
-	$(CXX) $(CXXFLAGS) -c -o $@ $< -lm
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(LIB_STATIC):		$(LIB_OBJECTS) $(LIB_HEADERS)
 	mkdir -p lib
 	$(AR) $(ARFLAGS) $@ $(LIB_OBJECTS)
 
 $(SHELL_PROGRAM):	$(SHELL_OBJECTS) $(LIB_STATIC)
-	$(CXX) $(LDFLAGS) -g -o $@ $(SHELL_OBJECTS) -lproject
+	$(CXX)  -g -o $@ $(SHELL_OBJECTS) $(LDFLAGS)
 
 $(TEST_PROGRAM):	$(TEST_OBJECTS) $(LIB_STATIC)
-	$(CXX) $(LDFLAGS) -g -o $@ $(TEST_OBJECTS) -lproject
+	$(CXX)  -g -o $@ $(TEST_OBJECTS) $(LDFLAGS)
 
 clean:
 	rm -f $(LIB_OBJECTS) $(LIB_STATIC) $(SHELL_OBJECTS) $(SHELL_PROGRAM) $(TEST_PROGRAM) $(TEST_OBJECTS)

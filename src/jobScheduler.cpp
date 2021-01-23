@@ -1,4 +1,6 @@
 #include "jobScheduler.h"
+#include <stdio.h>
+#include <unistd.h>
 
 /* based on place function from the class slides */
 void place(pool_t *pool,
@@ -57,12 +59,16 @@ jobScheduler::jobScheduler(int t_count, int p_size) : thread_count(t_count)
     pool = new pool_t(p_size);
     tids = new pthread_t[t_count];
     return_values = new list(NULL);
+    running_threads = 0;
 
     // TODO : check initializations (espesially conditions)
     pthread_mutex_init(&mutex, 0);
     pthread_mutex_init(&list_mutex, 0);
+    pthread_mutex_init(&mtx_running_threads, 0);
     pthread_cond_init(&cond_nonempty, 0);
     pthread_cond_init(&cond_nonfull, 0);
+    pthread_cond_init(&cond_running, 0);
+    execute_jobs();
 }
 
 void jobScheduler::submit_job(job *j)
@@ -76,8 +82,11 @@ void jobScheduler::execute_jobs()
     t_args = new thread_args;
     t_args->cond_nonempty = &cond_nonempty;
     t_args->cond_nonfull = &cond_nonfull;
+    t_args->cond_running = &cond_running;
     t_args->mutex = &mutex;
     t_args->list_mutex = &list_mutex;
+    t_args->mtx_running_threads = &mtx_running_threads;
+    t_args->running_threads = &running_threads;
     t_args->pool = pool;
     t_args->return_values = return_values;
     for (int i = 0; i < thread_count; i++)
@@ -88,12 +97,18 @@ void jobScheduler::execute_jobs()
 
 List jobScheduler::get_return_values()
 {
-    pthread_mutex_lock(&list_mutex);
     return return_values;
-    pthread_mutex_unlock(&list_mutex);
 }
 
 void jobScheduler::wait_all()
+{
+    pthread_mutex_lock(&mtx_running_threads);
+    while (running_threads)
+        pthread_cond_wait(&cond_running, &mtx_running_threads);
+    pthread_mutex_unlock(&mtx_running_threads);
+}
+
+void jobScheduler::terminate_all()
 {
     for (int i = 0; i < thread_count; i++)
         place(pool, &mutex, &cond_nonfull, &cond_nonempty, NULL);
@@ -104,32 +119,52 @@ void jobScheduler::wait_all()
 
 jobScheduler::~jobScheduler()
 {
-    wait_all();
+    terminate_all();
     delete[] tids;
     delete t_args;
 }
 
 void *thread_main(void *args)
 {
+    bool flg_last = 0;
     thread_args *args_ptr = (thread_args *)args;
     pool_t *pool = args_ptr->pool;
     pthread_mutex_t *mutex = args_ptr->mutex;
     pthread_mutex_t *list_mutex = args_ptr->list_mutex;
+    pthread_mutex_t *mtx_running_threads = args_ptr->mtx_running_threads;
     pthread_cond_t *cond_nonfull = args_ptr->cond_nonfull;
     pthread_cond_t *cond_nonempty = args_ptr->cond_nonempty;
+    pthread_cond_t *cond_running = args_ptr->cond_running;
     List return_values = args_ptr->return_values;
-
+    Pointer p;
+    int *running_threads = args_ptr->running_threads;
     Job j;
     while (1)
     {
         j = obtain(pool, mutex, cond_nonfull, cond_nonempty);
         if (j == NULL)
+        {
             pthread_exit(0);
+        }
         else
         {
+            pthread_mutex_lock(mtx_running_threads);
+            (*running_threads)++;
+            pthread_mutex_unlock(mtx_running_threads);
+
+            p = j->run();
             pthread_mutex_lock(list_mutex);
-            return_values->list_insert_next(NULL, j->run());
+            // printf("insert skata\n");
+            return_values->list_insert_next(NULL, p);
             pthread_mutex_unlock(list_mutex);
+
+            pthread_mutex_lock(mtx_running_threads);
+            (*running_threads)--;
+            if ((*running_threads) == 0)
+                flg_last = 1;
+            pthread_mutex_unlock(mtx_running_threads);
+            if (flg_last == 1)
+                pthread_cond_signal(cond_running);
         }
     }
 }

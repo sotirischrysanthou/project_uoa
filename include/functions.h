@@ -33,3 +33,6 @@ double *train(string filename, HashTable ht, HashTable idf, int reps=1);
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation=0);
 
 int findYourArg(int argc, const char *argv[],const char what[3]);
+
+
+double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count, int pool_size);
