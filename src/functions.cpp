@@ -701,7 +701,7 @@ public:
 
 double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count, int pool_size)
 {
-    jobScheduler* jsched=new jobScheduler(thread_count, pool_size);
+    jobScheduler *jsched = new jobScheduler(thread_count, pool_size);
     train_data *t_data = new train_data[thread_count];
     string *lines = new string[lines_counter(filename.c_str())];
     /* last position is b */
@@ -739,7 +739,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
     {
         // printf("loop %d\t\t",l);
         /* submit jobs */
-        
+
         for (i = 0; i < thread_count; i++)
         {
             // printf("thread %d\n", i);
@@ -766,7 +766,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
         /* change w */
         for (i = 0; i <= idf->ht_size(); i++)
         {
-       
+
             node = jsched->get_return_values()->list_first();
             sum = 0.0;
             div = 0;
@@ -779,7 +779,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
 
             // printf("%.30f ----------------------\n",(div * 1.0));
             // getchar();
-            
+
             new_W[i] = W[i] - a * (sum / (div * 1.0));
             if ((new_W[i] - W[i]) > 0.00001)
             {
@@ -794,7 +794,6 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
             }
         }
     }
-
 
     /* write best weights and b into a file */
     FILE *W_best = fopen("./best_W", "w");
@@ -811,6 +810,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
 
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation)
 {
+    int threshold = 0.0000000000001;
     int score = 0, s1 = 0, s0 = 0;
     int total = 0, t1 = 0, t0 = 0;
     double e = 3.17;
@@ -867,7 +867,7 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         if (similar)
         {
             t1++;
-            if (res > 0.0000000000001)
+            if (res > threshold)
             {
                 s1++;
                 score++;
@@ -881,12 +881,11 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         else
         {
             t0++;
-            if (res <= 0.0000000000001)
+            if (res <= threshold)
             {
                 s0++;
                 score++;
                 printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
-
             }
             else
             {
@@ -900,6 +899,205 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
     }
 
     printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1, t1);
+}
+
+struct test_data
+{
+    int line_count;
+    int idf_size;
+    int threshold;
+    string *lines;
+    HashTable ht;
+    double *W;
+};
+
+struct test_return
+{
+    int score, s0, s1;
+    int total, t0, t1;
+};
+
+class test_job : public job
+{
+    test_data *data;
+
+public:
+    test_job(Pointer data_p)
+    {
+        data = (test_data *)data_p;
+    }
+    /* code to be run by threads */
+    Pointer run()
+    {
+        HashTable ht_items;
+        item *it1, *it2;
+        string name1, name2, line;
+        int num1, num2, similar, comma1, comma2, slash1, slash2;
+        test_return *ret = new test_return;
+        ret->score = 0;
+        ret->s1 = 0;
+        ret->s0 = 0;
+        ret->total = 0;
+        ret->t1 = 0;
+        ret->t0 = 0;
+        // int counter;
+        double e = 2.71;
+        double sum, res;
+
+        // counter = 0;
+        for (int n = 0; n < data->line_count; n++)
+        {
+            line = data->lines[n];
+            slash1 = line.find("//");
+            comma1 = line.find(',', slash1);
+            slash2 = line.find("//", comma1);
+            comma2 = line.find(',', slash2);
+
+            name1 = line.substr(0, slash1);
+            num1 = stoi(line.substr(slash1 + 2, comma1 - slash1 + 2));
+            name2 = line.substr(comma1 + 1, slash2 - comma1 + 1 - 2);
+            num2 = stoi(line.substr(slash2 + 2, comma2 - slash2 + 2));
+            similar = stoi(line.substr(comma2 + 1));
+
+            // printf("%-25s // %-10d ---- %-25s // %-5d ---- %d\n",name1.c_str(), num1, name2.c_str(), num2, similar);
+
+            ht_items = (HashTable)data->ht->search(&name1, cmp_hashtable_search);
+            if (ht_items == NULL)
+                continue;
+            it1 = (item *)ht_items->search(&num1, cmp_hashtable_search_item);
+            ht_items = (HashTable)data->ht->search(&name2, cmp_hashtable_search);
+            if (ht_items == NULL)
+                continue;
+            it2 = (item *)ht_items->search(&num2, cmp_hashtable_search_item);
+
+            sum = data->W[data->idf_size];
+            for (int j = 0; j < data->idf_size; j++)
+            {
+                sum += abs(it1->get_bow_tfidf()[j] - it2->get_bow_tfidf()[j]) * data->W[j];
+                // sum += (it1->get_bow_tfidf()[j] + it2->get_bow_tfidf()[j]) / 2 * W[j];
+
+                // printf("%f - %f - %f\n",it1->get_bow_tfidf()[j] , it2->get_bow_tfidf()[j], W[j]);
+                // getchar();
+            }
+            res = 1.0 / (1.0 + pow(e, (-1.0) * sum));
+            if (similar)
+            {
+                ret->t1++;
+                if (res > data->threshold)
+                {
+                    ret->s1++;
+                    ret->score++;
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                }
+                else
+                {
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                }
+            }
+            else
+            {
+                ret->t0++;
+                if (res <= data->threshold)
+                {
+                    ret->s0++;
+                    ret->score++;
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                }
+                else
+                {
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                }
+            }
+            ret->total++;
+        }
+        return ret;
+    }
+
+};
+
+void test_main_thread(string filename, HashTable ht, double *W, int idf_size, int batch_size, int thread_count, int pool_size)
+{
+    int threshold = 0.0000000000001;
+    int score = 0, s1 = 0, s0 = 0;
+    int total = 0, t1 = 0, t0 = 0;
+    jobScheduler *jsched = new jobScheduler(thread_count, pool_size);
+    test_data *t_data = new test_data[thread_count];
+    string *lines = new string[lines_counter(filename.c_str())];
+    int i, all_lines;
+    size_t buffer_size = 0;
+    char *buffer = NULL;
+    FILE *stream = fopen(filename.c_str(), "r");
+    if (!stream)
+    {
+        printf("Error reading file: %s\n", filename.c_str());
+        return;
+    }
+
+    getline(&buffer, &buffer_size, stream);
+    i = 0;
+    while ((getline(&buffer, &buffer_size, stream) != -1))
+    {
+        lines[i] = buffer;
+        i++;
+    }
+    fclose(stream);
+    all_lines = i;
+
+    int loops = all_lines / (batch_size * thread_count);
+    /* if the division is not perfect, then another loop must be executed with the remaining lines */
+    if (all_lines % (batch_size * thread_count) > 0)
+        loops++;
+
+    test_data *ta;
+    for (int l = 0; l < loops; l++)
+    {
+        // printf("loop %d\t\t",l);
+        /* submit jobs */
+
+        for (i = 0; i < thread_count; i++)
+        {
+            // printf("thread %d\n", i);
+            if (all_lines - (i * batch_size) <= 0)
+                break;
+            ta = &t_data[i];
+            ta->ht = ht;
+            ta->idf_size = idf_size;
+            ta->threshold=threshold;
+            ta->W = W;
+            if (all_lines - ((i + 1) * batch_size) >= 0)
+                ta->line_count = batch_size;
+            else /* this is the final batch with fewer lines than the rest */
+                ta->line_count = all_lines - (i * batch_size);
+            ta->lines = &lines[i * ta->line_count];
+
+            jsched->submit_job(new test_job(ta));
+        }
+
+        ListNode node;
+        jsched->wait_all();
+        /* change w */
+
+        test_return *ret;
+        node = jsched->get_return_values()->list_first();
+        while (node != NULL)
+        {
+            ret = ((test_return *)node->value);
+            total+=ret->total;
+            score+=ret->score;
+            s0+=ret->s0;
+            s1+=ret->s1;
+            t0+=ret->t0;
+            t1+=ret->t1;
+
+            node = node->next;
+        }
+    
+    }
+    printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1, t1);
+
+    delete jsched;
+    delete[] lines;
+    delete[] t_data;
 }
 
 int findYourArg(int argc, const char *argv[], const char what[3])

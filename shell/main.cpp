@@ -162,9 +162,9 @@ int main(int argc, char const *argv[])
             gettimeofday(&t1, NULL); // start timer
 
             printf("----------TEST----------\n");
-            //TODO: if (part>2)
-            //TODO:     thread_train
-            //TODO: else
+            if (part>2)
+                test_main_thread("test.csv", HT, b, IDF->ht_size(),10,10,10);
+            else
             test("test.csv", HT, b, IDF->ht_size());
             printf("------------------------\n");
 
