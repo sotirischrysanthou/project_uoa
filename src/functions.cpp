@@ -702,7 +702,7 @@ public:
 double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count, int pool_size)
 {
     jobScheduler* jsched=new jobScheduler(thread_count, pool_size);
-    //TODO: train_data *t_data = new train_data[thread_count];
+    train_data *t_data = new train_data[thread_count];
     string *lines = new string[lines_counter(filename.c_str())];
     /* last position is b */
     double *W = new double[idf->ht_size() + 1]();
@@ -745,9 +745,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
             // printf("thread %d\n", i);
             if (all_lines - (i * batch_size) <= 0)
                 break;
-            //TODO: ta = &t_data[i];
-            //TODO: remove next line
-            ta = new train_data;
+            ta = &t_data[i];
             ta->ht = ht;
             ta->idf = idf;
             ta->reps = reps;
@@ -807,6 +805,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
     fclose(W_best);
     delete jsched;
     delete[] lines;
+    delete[] t_data;
     return best_W;
 }
 
