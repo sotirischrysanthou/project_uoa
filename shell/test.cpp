@@ -1,6 +1,26 @@
 #include <acutest.h>
 #include "functions.h"
 
+void test_small(void)
+{
+    HashTable HT = new hashtable(10,del_main_ht, hashfunction);
+    HashTable IDF = NULL;
+    // IDF = new hashtable(500,NULL, hashfunction);
+    int c = read_all_folders("./data/test_small_data", HT, IDF);
+    if (!TEST_CHECK(HT != NULL))
+        TEST_MSG("reading folders failed");
+    read_csv("./data/sigmod_small_labelled_dataset.csv", HT);
+    // set_Bow_or_TfIdf(HT, IDF, c, 1);
+    FILE *output_file = fopen("./output_test_small.txt", "w");
+    print_all(HT, output_file);
+    fclose(output_file);
+    if(!TEST_CHECK(lines_counter("./output_test_small.txt")==28))
+        TEST_MSG("incorrect output");
+    delete HT;
+    // delete IDF;
+    c++;
+}
+
 void test_medium(void)
 {
     HashTable HT = new hashtable(10,del_main_ht, hashfunction);
@@ -14,7 +34,7 @@ void test_medium(void)
     FILE *output_file = fopen("./output_test_medium.txt", "w");
     print_all(HT, output_file);
     fclose(output_file);
-    if(!TEST_CHECK(lines_counter("./output_test_medium.txt")==3582))
+    if(!TEST_CHECK(lines_counter("./output_test_medium.txt")==46665))
         TEST_MSG("incorrect output");
     delete HT;
     // delete IDF;
@@ -34,7 +54,7 @@ void test_large(void)
     FILE *output_file = fopen("./output_test_large.txt", "w");
     print_all(HT, output_file);
     fclose(output_file);
-    if(!TEST_CHECK(lines_counter("./output_test_large.txt")==42535))
+    if(!TEST_CHECK(lines_counter("./output_test_large.txt")==341929))
         TEST_MSG("incorrect output");
     delete HT;
     // delete IDF;
@@ -49,6 +69,7 @@ void test_parse(void)
 }
 
 TEST_LIST = {
+   { "test_small", test_small },
    { "test_medium", test_medium },
    { "test_large", test_large },
    { "test_parse", test_parse },

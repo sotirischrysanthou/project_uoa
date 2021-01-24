@@ -163,7 +163,7 @@ int main(int argc, char const *argv[])
 
             printf("----------TEST----------\n");
             if (part>2)
-                test_main_thread("test.csv", HT, b, IDF->ht_size(),10,10,10);
+                test_main_thread("test.csv", HT, b, IDF->ht_size(),10,100,10);
             else
             test("test.csv", HT, b, IDF->ht_size());
             printf("------------------------\n");
