@@ -640,6 +640,8 @@ public:
         double f, sigma;
         /* last position of the delta array is the b */
         double *return_table = new double[data->idf->ht_size() + 1];
+        for(i=0;i<data->idf->ht_size();i++)
+            return_table[i]=data->W[i];
 
         double x[data->idf->ht_size()];
         for (i = 0; i < data->reps; i++)
@@ -681,7 +683,7 @@ public:
                 f = b;
                 for (int j = 0; j < data->idf->ht_size(); j++)
                 {
-                    f += data->W[j] * x[j];
+                    f += return_table[j] * x[j];
                 }
 
                 sigma = 1.0 / (1.0 + pow(e, (-1.0) * f));
@@ -695,6 +697,7 @@ public:
                 }
             }
         }
+        delete data;
         return return_table;
     }
 };
@@ -702,13 +705,12 @@ public:
 double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps, int batch_size, int thread_count, int pool_size)
 {
     jobScheduler *jsched = new jobScheduler(thread_count, pool_size);
-    train_data *t_data = new train_data[thread_count];
     string *lines = new string[lines_counter(filename.c_str())];
     /* last position is b */
     double *W = new double[idf->ht_size() + 1]();
     double new_W[idf->ht_size() + 1];
     double *best_W = new double[idf->ht_size() + 1]();
-    double a = 0.6;
+    double a = 0.05;
     int i, all_lines;
     size_t buffer_size = 0;
     char *buffer = NULL;
@@ -735,6 +737,7 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
         loops++;
 
     train_data *ta;
+    bool flg_break=0;
     for (int l = 0; l < loops; l++)
     {
         // printf("loop %d\t\t",l);
@@ -743,18 +746,21 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
         for (i = 0; i < thread_count; i++)
         {
             // printf("thread %d\n", i);
-            if (all_lines - (i * batch_size) <= 0)
+            if (flg_break)
                 break;
-            ta = &t_data[i];
+            ta = new train_data;
             ta->ht = ht;
             ta->idf = idf;
             ta->reps = reps;
             ta->W = W;
-            if (all_lines - ((i + 1) * batch_size) >= 0)
+            if (((l*thread_count+i)*batch_size)+batch_size>all_lines) /* this is the final batch with fewer lines than the rest */
+            {
+                ta->line_count = all_lines-((l*thread_count+i)*batch_size);
+                flg_break=1;
+            }
+            else
                 ta->line_count = batch_size;
-            else /* this is the final batch with fewer lines than the rest */
-                ta->line_count = all_lines - (i * batch_size);
-            ta->lines = &lines[i * ta->line_count];
+            ta->lines = &lines[(l*thread_count+i)*batch_size];
 
             jsched->submit_job(new train_job(ta));
         }
@@ -804,13 +810,12 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
     fclose(W_best);
     delete jsched;
     delete[] lines;
-    delete[] t_data;
     return best_W;
 }
 
 void test(string filename, HashTable ht, double *W, int idf_size, bool validation)
 {
-    int threshold = 0.0000000000001;
+    int threshold = 0.00001;
     int score = 0, s1 = 0, s0 = 0;
     int total = 0, t1 = 0, t0 = 0;
     double e = 3.17;
@@ -827,7 +832,7 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
         printf("Error reading file: %s\n", filename.c_str());
         return;
     }
-    getline(&buffer, &buffer_size, stream);
+
     while (getline(&buffer, &buffer_size, stream) != -1)
     {
         line = buffer;
@@ -871,11 +876,11 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
             {
                 s1++;
                 score++;
-                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
             }
             else
             {
-                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
             }
         }
         else
@@ -885,11 +890,11 @@ void test(string filename, HashTable ht, double *W, int idf_size, bool validatio
             {
                 s0++;
                 score++;
-                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
             }
             else
             {
-                printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
             }
         }
         total++;
@@ -905,7 +910,7 @@ struct test_data
 {
     int line_count;
     int idf_size;
-    int threshold;
+    double threshold;
     string *lines;
     HashTable ht;
     double *W;
@@ -943,7 +948,6 @@ public:
         // int counter;
         double e = 2.71;
         double sum, res;
-
         // counter = 0;
         for (int n = 0; n < data->line_count; n++)
         {
@@ -987,11 +991,11 @@ public:
                 {
                     ret->s1++;
                     ret->score++;
-                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
                 else
                 {
-                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
             }
             else
@@ -1001,27 +1005,27 @@ public:
                 {
                     ret->s0++;
                     ret->score++;
-                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
                 else
                 {
-                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
             }
             ret->total++;
         }
+        delete data;
         return ret;
     }
-
 };
 
 void test_main_thread(string filename, HashTable ht, double *W, int idf_size, int batch_size, int thread_count, int pool_size)
 {
-    int threshold = 0.0000000000001;
+    // double threshold = 0.13;     // best for medium
+    double threshold = 0.000002;    // best for large
     int score = 0, s1 = 0, s0 = 0;
     int total = 0, t1 = 0, t0 = 0;
     jobScheduler *jsched = new jobScheduler(thread_count, pool_size);
-    test_data *t_data = new test_data[thread_count];
     string *lines = new string[lines_counter(filename.c_str())];
     int i, all_lines;
     size_t buffer_size = 0;
@@ -1033,7 +1037,6 @@ void test_main_thread(string filename, HashTable ht, double *W, int idf_size, in
         return;
     }
 
-    getline(&buffer, &buffer_size, stream);
     i = 0;
     while ((getline(&buffer, &buffer_size, stream) != -1))
     {
@@ -1043,61 +1046,54 @@ void test_main_thread(string filename, HashTable ht, double *W, int idf_size, in
     fclose(stream);
     all_lines = i;
 
-    int loops = all_lines / (batch_size * thread_count);
-    /* if the division is not perfect, then another loop must be executed with the remaining lines */
-    if (all_lines % (batch_size * thread_count) > 0)
+
+    int loops = all_lines / batch_size;
+    if (all_lines % batch_size)
         loops++;
-
+    int t = 0;
     test_data *ta;
-    for (int l = 0; l < loops; l++)
+    for (i = 0; i < loops; i++)
     {
-        // printf("loop %d\t\t",l);
-        /* submit jobs */
+        if (t == thread_count - 1)
+            t = 0;
+        ta = new test_data;
+        ta->ht = ht;
+        ta->idf_size = idf_size;
+        ta->threshold = threshold;
+        ta->W = W;
+        if (i == loops - 1)
+            ta->line_count = all_lines % batch_size;
+        else
+            ta->line_count = batch_size;
+        ta->lines = &lines[i * batch_size];
+        jsched->submit_job(new test_job(ta));
+        t++;
+    }
 
-        for (i = 0; i < thread_count; i++)
-        {
-            // printf("thread %d\n", i);
-            if (all_lines - (i * batch_size) <= 0)
-                break;
-            ta = &t_data[i];
-            ta->ht = ht;
-            ta->idf_size = idf_size;
-            ta->threshold=threshold;
-            ta->W = W;
-            if (all_lines - ((i + 1) * batch_size) >= 0)
-                ta->line_count = batch_size;
-            else /* this is the final batch with fewer lines than the rest */
-                ta->line_count = all_lines - (i * batch_size);
-            ta->lines = &lines[i * ta->line_count];
+    jsched->wait_all();
 
-            jsched->submit_job(new test_job(ta));
-        }
+    test_return *ret;
+    ListNode node;
+    node = jsched->get_return_values()->list_first();
+    int count = 0;
+    while (node != NULL)
+    {
+        ret = ((test_return *)node->value);
 
-        ListNode node;
-        jsched->wait_all();
-        /* change w */
+        count++;
+        total += ret->total;
+        score += ret->score;
+        s0 += ret->s0;
+        s1 += ret->s1;
+        t0 += ret->t0;
+        t1 += ret->t1;
 
-        test_return *ret;
-        node = jsched->get_return_values()->list_first();
-        while (node != NULL)
-        {
-            ret = ((test_return *)node->value);
-            total+=ret->total;
-            score+=ret->score;
-            s0+=ret->s0;
-            s1+=ret->s1;
-            t0+=ret->t0;
-            t1+=ret->t1;
-
-            node = node->next;
-        }
-    
+        node = node->next;
     }
     printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1, t1);
 
     delete jsched;
     delete[] lines;
-    delete[] t_data;
 }
 
 int findYourArg(int argc, const char *argv[], const char what[3])

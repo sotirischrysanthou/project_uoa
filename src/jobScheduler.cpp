@@ -101,8 +101,9 @@ List jobScheduler::get_return_values()
 
 void jobScheduler::wait_all()
 {
+    // sleep(1);
     pthread_mutex_lock(&mtx_running_threads);
-    while (running_threads)
+    while (running_threads || (pool->count>0))
         pthread_cond_wait(&cond_running, &mtx_running_threads);
     pthread_mutex_unlock(&mtx_running_threads);
 }
@@ -153,14 +154,15 @@ void *thread_main(void *args)
 
             p = j->run();
             pthread_mutex_lock(list_mutex);
-            // printf("insert skata\n");
             return_values->list_insert_next(NULL, p);
             pthread_mutex_unlock(list_mutex);
 
             pthread_mutex_lock(mtx_running_threads);
+            // pthread_mutex_lock(mutex);
             (*running_threads)--;
-            if ((*running_threads) == 0)
+            if ((*running_threads) == 0 && pool->count==0)
                 flg_last = 1;
+            // pthread_mutex_unlock(mutex);
             pthread_mutex_unlock(mtx_running_threads);
             if (flg_last == 1)
                 pthread_cond_signal(cond_running);

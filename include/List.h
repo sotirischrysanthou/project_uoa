@@ -37,7 +37,7 @@ public:
     // Returns the number of list's elements.
     int list_size();
 
-    // Adds new_node next to node, or at the bigin of list if node == LIST_BOF.
+    // Adds new_node next to node, or at the beginning of the list if node == LIST_BOF.
     void list_insert_next(ListNode node, Pointer value);
     
     // Removes next node of node, of first node if node == LIST_BOF.

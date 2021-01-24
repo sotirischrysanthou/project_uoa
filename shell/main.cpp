@@ -125,7 +125,7 @@ int main(int argc, char const *argv[])
 
             /* 10 iterations seemed to give the best results */
             if(part>2)
-                b = train_main_thread("train.csv", HT, IDF, 5, 1000, 10, 10);
+                b = train_main_thread("train.csv", HT, IDF, 10, 100, 5, 10);
             else
                 b = train("train.csv", HT, IDF, 5);
                 /*  for medium: ~1.30m
