@@ -1,6 +1,35 @@
 #include <acutest.h>
 #include "functions.h"
 
+
+void test_list(void)
+{
+    List l = new list(NULL);
+    int i=10;
+    l->list_insert_next(NULL,&i);
+    if(!TEST_CHECK(l->list_size()==1))
+        TEST_MSG("incorrect list size");
+    if(!TEST_CHECK(*(int*)(l->list_first()->value)==10))
+        TEST_MSG("incorrect list_node value");
+    delete l;
+}
+
+void test_ht(void)
+{
+    HashTable ht = new hashtable(10,NULL,hashfunction);
+    string strk = "mykey";
+    string strv = "myvalue";
+    HashTable_Node htn = new hashtable_node;
+    htn->key=&strk;
+    htn->value=&strv;
+    ht->insert(htn);
+    if(!TEST_CHECK(ht->ht_size()==1))
+        TEST_MSG("incorrect hashtable size");
+    string strr = *(string*)(ht->search(&strk, cmp_hashtable_search));
+    if(!TEST_CHECK(strr.compare(strv)==0))
+        TEST_MSG("incorrect hashtable_node value");
+}
+
 void test_small(void)
 {
     HashTable HT = new hashtable(10,del_main_ht, hashfunction);
@@ -69,6 +98,8 @@ void test_parse(void)
 }
 
 TEST_LIST = {
+   { "test_list", test_list },
+   { "test_ht", test_ht },
    { "test_small", test_small },
    { "test_medium", test_medium },
    { "test_large", test_large },
