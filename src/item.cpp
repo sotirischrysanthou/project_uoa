@@ -39,7 +39,6 @@ item::~item()
 {
     if (specs != NULL)
         delete specs;
-    // delete common_and_uncommon.uncommon;
     delete words;
     if(array)
         delete[] array;

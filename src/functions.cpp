@@ -991,11 +991,11 @@ public:
                 {
                     ret->s1++;
                     ret->score++;
-                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
                 else
                 {
-                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
             }
             else
@@ -1005,11 +1005,11 @@ public:
                 {
                     ret->s0++;
                     ret->score++;
-                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
                 else
                 {
-                    printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
+                    // printf("sum = %f, res = %.100f, similar = %d\n", sum, res, similar);
                 }
             }
             ret->total++;
