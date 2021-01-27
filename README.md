@@ -19,6 +19,9 @@ This part uses threads for trainig the data (using mini batching) as well as tes
 The value of a and the threshold are vocates inside the training functions in src/functions.cpp with values we found worked best in the examples given.
 The number of threads, batch sizeand number of repetitions are given to the training funcion as arguments. We notice that after a certain number of repetitions the results for 0 and 1 stop showing any difference. The number we found to be best was 10 repetitions. As for the theads and batch size, we tested many variations, but with a large batch, weights chane less often, giving worse results.
 
+The best variables (a, threshold, threads, etc.) are the ones in the code.
+On part 3 medium input runs at about 40 seconds and large at 2 minutes.
+
 Usage:
     ./exe -p 2 -d ./data/2013_camera_specs -c ./data/sigmod_large_labelled_dataset.csv -v tfidf -t train -o output_file.txt
     -p  : which part to execute 1 or 2 (a default is set inside main)

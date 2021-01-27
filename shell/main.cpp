@@ -6,13 +6,21 @@
 /*          ./exe ./data/2013_camera_specs ./data/sigmod_large_labelled_dataset.csv tfidf both output_file.txt */
 /*          ./exe -p 2 -d ./data/2013_camera_specs -c ./data/sigmod_large_labelled_dataset.csv -v tfidf -t both -o output_file.txt */
 
+void del_idf(Pointer value)
+{
+    HashTable_Node ht_n=(HashTable_Node)value;
+    int *counter=(int*)ht_n->value;
+    delete[] counter;
+    delete ht_n;
+}
+
 int main(int argc, char const *argv[])
 {
     int part = 2;
     if (findYourArg(argc, argv, "-p") != 0)
         part = atoi(argv[findYourArg(argc, argv, "-p")]);
-    string input_folder = argv[findYourArg(argc, argv, "-d")];
-    string csv_file = argv[findYourArg(argc, argv, "-c")];
+    const char* input_folder = argv[findYourArg(argc, argv, "-d")];
+    const char* csv_file = argv[findYourArg(argc, argv, "-c")];
     bool bow_tfidf = 1;
     if (findYourArg(argc, argv, "-v") != 0)
         if (strcmp(argv[findYourArg(argc, argv, "-v")], "bow") == 0)
@@ -25,7 +33,7 @@ int main(int argc, char const *argv[])
     HT = new hashtable(10, del_main_ht, hashfunction);
     HashTable IDF = NULL;
     if (part > 1)
-        IDF = new hashtable(500, NULL, hashfunction);
+        IDF = new hashtable(500, del_idf, hashfunction);
 
     gettimeofday(&t1, NULL); // start timer
 
@@ -173,7 +181,7 @@ int main(int argc, char const *argv[])
             elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000000.0; // us to ms
             printf("%f s. for validation/test\n", elapsedTime);
         }
-
+        delete buffer;
         delete b;
     }
 

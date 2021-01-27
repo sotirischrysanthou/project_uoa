@@ -14,6 +14,7 @@ typedef class job *Job;
 class job
 {
     public:
+    virtual ~job(){};
     virtual Pointer run()=0;
 };
 

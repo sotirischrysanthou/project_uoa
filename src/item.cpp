@@ -23,17 +23,25 @@ void del_words(Pointer p)
     delete i;
     delete ht_n;
 }
+void del_uncomon_ht_htnode(Pointer value)
+{
+    HashTable_Node ht_n=(HashTable_Node)value;
+    ht_n->key=NULL;
+    ht_n->value=NULL;
+    delete ht_n;
+}
 
 item::item(string fldr, int i ): folder(fldr), id(i)
 {
     array=NULL;
     common_and_uncommon.common = new list(NULL);
-    common_and_uncommon.uncommon = new hashtable(100,NULL,hashfunction_address);
+    common_and_uncommon.uncommon = new hashtable(100,del_uncomon_ht_htnode,hashfunction_address);
     common_and_uncommon.common->list_insert_next(LIST_BOF, this);
     words = new hashtable(50,del_words,hashfunction);
 
     // printf("Debug!!%s//%d   %d  \n",folder.c_str(),id,common_list->list_size());
 }
+
 
 item::~item()
 {

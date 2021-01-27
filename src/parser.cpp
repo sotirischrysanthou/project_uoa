@@ -182,21 +182,22 @@ void tf_ifd_hts_insert(int begin, int end)
                 ht_n->key = word;
                 ht_n->value = counter;
                 tf_ht->insert(ht_n);
-                    counter = (int *)idf_ht->search(word, cmp_hashtable_search);
-                    if (counter)
-                        counter[1]++;
-                    else
-                    {
-                        counter = new int[2];
-                        counter[0] = idf_ht->ht_size();
-                        counter[1] = 1;
-                        
-                        ht_n = new hashtable_node;
-                        ht_n->key = word;
-                        ht_n->value = counter;
-                        idf_ht->insert(ht_n);
-                    }
-                
+                counter = (int *)idf_ht->search(word, cmp_hashtable_search);
+                if (counter)
+                    counter[1]++;
+                else
+                {
+                    counter = new int[2];
+                    /* word position in the array so the right calculations are made later */
+                    counter[0] = idf_ht->ht_size();
+                    /* the actual counter */
+                    counter[1] = 1;
+
+                    ht_n = new hashtable_node;
+                    ht_n->key = word;
+                    ht_n->value = counter;
+                    idf_ht->insert(ht_n);
+                }
             }
             begin_of_word = i + 1;
         }

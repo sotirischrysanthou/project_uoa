@@ -120,6 +120,8 @@ void jobScheduler::terminate_all()
 jobScheduler::~jobScheduler()
 {
     terminate_all();
+    delete pool;
+    delete return_values;
     delete[] tids;
     delete t_args;
 }
@@ -153,6 +155,7 @@ void *thread_main(void *args)
             pthread_mutex_unlock(mtx_running_threads);
 
             p = j->run();
+            delete j;
             pthread_mutex_lock(list_mutex);
             return_values->list_insert_next(NULL, p);
             pthread_mutex_unlock(list_mutex);

@@ -26,6 +26,11 @@ hashtable::~hashtable()
 {
     for (int i = 0; i < buckets; i++)
     {
+        if(table[i]->list_size() >0)
+        {
+            bool j;
+            j=true;
+        }
         delete table[i];
     }
     delete[] table;

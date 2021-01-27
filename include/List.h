@@ -66,6 +66,11 @@ public:
     
     // Returns node's content that is equal with value
     ListNode list_find_node(Pointer value, CompareFunc compare);
+
+    void change_destroy_value(DestroyFunc d_value)
+    {
+        destroy_value=d_value;
+    }
 };
 
 #endif

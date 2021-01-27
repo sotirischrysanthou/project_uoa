@@ -68,6 +68,7 @@ void similar_items(item *A, item *B)
         common_a->list_insert_next(common_a->list_last(), tempItem);
         tempNode = common_b->list_next(tempNode);
     }
+    delete common_b;
     delete tempList;
 }
 
@@ -383,8 +384,8 @@ void print_all(HashTable ht, FILE *output_file)
         delete items_list;
     }
     delete hts;
-    delete visited_lists;
     delete visited_uncommon;
+    delete visited_lists;
 }
 
 void set_Bow_or_TfIdf(HashTable ht, HashTable idf, int item_count, bool flag)
@@ -625,6 +626,7 @@ public:
     {
         data = (train_data *)data_p;
     }
+    ~train_job(){}
     /* code to be run by threads */
     Pointer run()
     {
@@ -808,8 +810,10 @@ double *train_main_thread(string filename, HashTable ht, HashTable idf, int reps
         fprintf(W_best, "%f\n", best_W[i]);
     }
     fclose(W_best);
+    delete buffer;
     delete jsched;
     delete[] lines;
+    delete[] W;
     return best_W;
 }
 
@@ -931,6 +935,7 @@ public:
     {
         data = (test_data *)data_p;
     }
+    ~test_job(){}
     /* code to be run by threads */
     Pointer run()
     {
@@ -1091,7 +1096,7 @@ void test_main_thread(string filename, HashTable ht, double *W, int idf_size, in
         node = node->next;
     }
     printf("total score:\t %d/%d\n0s:\t\t %d/%d\n1s:\t\t %d/%d\n", score, total, s0, t0, s1, t1);
-
+    delete buffer;
     delete jsched;
     delete[] lines;
 }

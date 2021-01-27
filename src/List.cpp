@@ -78,7 +78,7 @@ void list::list_remove_next(ListNode node)
 
 	node->next = removed->next;
 
-	free(removed);
+	delete removed;
 
 	// Update size & last
 	size--;
